@@ -1,20 +1,31 @@
 import mongoose from "mongoose";
 
+
+const roundSchema = new mongoose.Schema({
+  name: { type: String, required: true }, // e.g., "Aptitude Test", "Interview"
+  qualifiedStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Students qualified for this round
+
+});
+
 const jobSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     description: { type: String, required: true },
     company: { type: String, required: true },
     location: { type: String, required: true },
-    type: { type: String, enum: ["job", "internship"], required: true }, // Job or Internship
+    type: { type: String, required: true },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    college: { type: mongoose.Schema.Types.ObjectId, ref: "College", required: true },
     eligibilityCriteria: {
-      branch: [{ type: String, required: true }], // Example: ["CSE", "IT"]
-      tenthPercentage: { type: Number, required: true },
-      twelfthPercentage: { type: Number, required: true },
-      semesterClear: { type: Boolean, default: true }, // All semesters clear
+      tenthPercentage: { type: Number, default: 0 },
+      twelfthPercentage: { type: Number, default: 0 },
+      branch: { type: [String], default: [] },
+      semesterClear: { type: Boolean, default: true },
     },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // TNP Admin
-    college: { type: mongoose.Schema.Types.ObjectId, ref: "College", required: true }, // Link job to college
+    totalApplications: { type: Number, default: 0 },
+    appliedStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    eligibleStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    rounds: [roundSchema], // New Field
   },
   { timestamps: true }
 );

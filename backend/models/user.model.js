@@ -42,6 +42,13 @@ const userSchema = new mongoose.Schema({
       {
         jobId: { type: mongoose.Schema.Types.ObjectId, ref: "Job" },
         appliedOn: { type: Date, default: Date.now },
+        roundsHistory: [
+          {
+            roundId: { type: mongoose.Schema.Types.ObjectId, ref: "Round" }, // Reference to a specific round
+            status: { type: String, enum: ["qualified", "not_qualified", "pending"], default: "pending" }, // Status of the student in this round
+            date: { type: Date, default: Date.now }, // Date when the round status was updated
+          },
+        ],
       },
     ],
   },
