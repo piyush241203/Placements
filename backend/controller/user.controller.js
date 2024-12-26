@@ -81,32 +81,22 @@ export const loginUser = async (req, res) => {
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) return res.status(401).json({ message: "Invalid credentials" });
 
-    // 3. Restrict login if the user is TNP Admin or Student and the college subscription is expired/suspended
-    if (user.role === "tnp_admin" || user.role === "student") {
-      const college = await College.findById(user.college);
+    // 3. Generate JWT token and set it in cookies
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "30d" });  // Check token in server logs
 
-      if (!college) {
-        return res.status(403).json({ message: "College not found" });
-      }
-
-      const { status, endDate } = college.subscription;
-
-      // Check subscription status and expiry date
-      if (status === "suspended" || new Date(endDate) < new Date()) {
-        return res
-          .status(403)
-          .json({ message: "College subscription expired or suspended. Please contact the administrator." });
-      }
-    }
-
-    // 4. Generate JWT token and set it in cookies
-    generateToken(res, user._id);
+    res.cookie("token", token, {
+      httpOnly: true, // Secure the cookie
+      secure: process.env.NODE_ENV === "production", // HTTPS only in production
+      sameSite: "strict", // Prevent CSRF
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
 
     res.status(200).json({ message: "Login successful", user: { id: user._id, role: user.role } });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 
 // Logout User
 export const logoutUser = (req, res) => {
