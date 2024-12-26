@@ -1,134 +1,251 @@
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from "../models/user.model.js";
+import  { User }  from "../models/user.model.js";
+import { College } from "../models/college.model.js";
+import dotenv from "dotenv";
 
-/**
- * @desc Register a new user
- * @route POST /api/auth/register
- * @access Public
- */
-export const registerUser = async (req, res) => {
-  const { email, password, role } = req.body;
+dotenv.config();
+
+// Generate JWT token
+const generateToken = (res, userId) => {
+  const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "30d" });
+
+  res.cookie("token", token, {
+    httpOnly: true, // Secure the cookie
+    secure: process.env.NODE_ENV === "production", // HTTPS only in production
+    sameSite: "strict", // Prevent CSRF
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+  });
+};
+
+// Global Admin creates a TNP Admin
+export const createTnpAdmin = async (req, res) => {
+  const { email, password, collegeId } = req.body;
 
   try {
-    // Check if the user already exists
+    // 1. Check if College exists
+    const college = await College.findById(collegeId);
+    if (!college) return res.status(404).json({ message: "College not found" });
+
+    // 2. Check for existing user
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
-    }
+    if (existingUser) return res.status(400).json({ message: "Email already in use" });
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // 3. Create a TNP Admin user
+    const tnpAdmin = new User({ email, password, role: "tnp_admin", college: college._id });
+    await tnpAdmin.save();
 
-    // Create a new user
-    const newUser = new User({
-      email,
-      password: hashedPassword,
-      role,
-    });
+    // 4. Link TNP Admin to the college
+    college.tnpAdmin = tnpAdmin._id;
+    await college.save();
 
-    await newUser.save();
-    res.status(201).json({ message: "User registered successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(201).json({ message: "TNP Admin created successfully", tnpAdmin });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
-/**
- * @desc Login user
- * @route POST /api/auth/login
- * @access Public
- */
+// TNP Admin creates a Student
+export const createStudent = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Ensure role-based access
+    if (req.user.role !== "tnp_admin") {
+      return res.status(403).json({ message: "Only TNP Admins can create students" });
+    }
+
+    // 1. Check if email is already in use
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ message: "Email already in use" });
+
+    // 2. Create a Student user linked to the same college as the TNP Admin
+    const student = new User({ email, password, role: "student", college: req.user.college });
+    await student.save();
+
+    res.status(201).json({ message: "Student created successfully", student });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// User Login
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Find the user
+    // 1. Find the user
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Compare passwords
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+    // 2. Validate password
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) return res.status(401).json({ message: "Invalid credentials" });
 
-    // Generate a JWT
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
+    // 3. Generate JWT token and set it in cookies
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "30d" });  // Check token in server logs
+
+    res.cookie("token", token, {
+      httpOnly: true, // Secure the cookie
+      secure: process.env.NODE_ENV === "production", // HTTPS only in production
+      sameSite: "strict", // Prevent CSRF
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
-    res.status(200).json({ message: "Login successful", token });
-  } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(200).json({ message: "Login successful", user: { id: user._id, role: user.role } });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
-/**
- * @desc Get user details
- * @route GET /api/auth/user/:id
- * @access Private
- */
-export const getUserDetails = async (req, res) => {
-  const { id } = req.params;
 
+// Logout User
+export const logoutUser = (req, res) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({ message: "Logout successful" });
+};
+
+
+// List all users of a specific college
+export const listUsersOfCollege = async (req, res) => {
   try {
-    const user = await User.findById(id).select("-password"); // Exclude the password
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    // Get the college ID from the URL params
+    const { collegeId } = req.params;
+
+    // Ensure the current user is either a TNP Admin of that college or a Global Admin
+    if (req.user.role !== 'global_admin') {
+      const userCollege = await College.findById(collegeId);
+      if (!userCollege) {
+        return res.status(404).json({ message: "College not found" });
+      }
+
+      // Check if the current user is the TNP Admin of the college
+      if (userCollege.tnpAdmin.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: "Not authorized to view users for this college" });
+      }
     }
 
-    res.status(200).json(user);
-  } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    // Fetch all users related to the specific college
+    const users = await User.find({ college: collegeId }).populate('college', 'name');
+    
+    // If no users found
+    if (users.length === 0) {
+      return res.status(404).json({ message: "No users found for this college" });
+    }
+
+    // Send the response with the list of users
+    res.status(200).json({
+      message: "Users fetched successfully",
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
-/**
- * @desc Update user details
- * @route PUT /api/auth/user/:id
- * @access Private
- */
-export const updateUserDetails = async (req, res) => {
-  const { id } = req.params;
-  const { email, role } = req.body;
+export const deleteStudent = async (req, res) => {
+  const { studentId } = req.params;
 
   try {
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      { email, role },
-      { new: true, runValidators: true }
-    ).select("-password"); // Exclude the password
-
-    if (!updatedUser) {
-      return res.status(404).json({ message: "User not found" });
+    // Ensure role-based access
+    if (req.user.role !== "tnp_admin") {
+      return res.status(403).json({ message: "Only TNP Admins can delete students" });
     }
 
-    res.status(200).json({ message: "User updated successfully", updatedUser });
-  } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    // Find the student to delete
+    const student = await User.findById(studentId);
+    if (!student || student.role !== "student") {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // Ensure the student belongs to the same college as the TNP Admin
+    if (student.college.toString() !== req.user.college.toString()) {
+      return res.status(403).json({ message: "Not authorized to delete this student" });
+    }
+
+    await User.findByIdAndDelete(studentId);
+    res.status(200).json({ message: "Student deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
-/**
- * @desc Delete user
- * @route DELETE /api/auth/user/:id
- * @access Private
- */
-export const deleteUser = async (req, res) => {
-  const { id } = req.params;
+// Middleware to ensure the user is a student
+const isStudent = (user) => user.role === "student";
 
+// Update Student Profile
+export const updateStudentProfile = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(id);
+    const studentId = req.user._id; // Authenticated student
+    const updates = req.body;
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    // Fetch the student
+    const student = await User.findById(studentId);
+    if (!student || !isStudent(student)) {
+      return res.status(404).json({ message: "Student not found" });
     }
 
-    res.status(200).json({ message: "User deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    // Update profile fields selectively
+    if (updates.profile) {
+      // Only update the fields that are included in the request body
+      const profileUpdates = { ...updates.profile };
+
+      // If the user has updated the 10th details, update those
+      if (profileUpdates.tenthDetails !== undefined) {
+        student.profile.tenthDetails = {
+          ...student.profile.tenthDetails,
+          ...profileUpdates.tenthDetails,
+        };
+      }
+
+      // If the user has updated the 12th details, update those
+      if (profileUpdates.twelfthDetails !== undefined) {
+        student.profile.twelfthDetails = {
+          ...student.profile.twelfthDetails,
+          ...profileUpdates.twelfthDetails,
+        };
+      }
+
+      // For other profile fields (like cgpa, achievements, etc.), update them as well
+      student.profile = { ...student.profile, ...profileUpdates };
+    }
+
+    // Save the updated student profile
+    await student.save();
+
+    res.status(200).json({ message: "Profile updated successfully", student });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+// TNP Admin Dashboard - View Student Profile Completion
+export const getProfileCompletionDetails = async (req, res) => {
+  try {
+    // Ensure the user is a TNP Admin
+    if (req.user.role !== "tnp_admin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Fetch all students of the same college
+    const students = await User.find({ college: req.user.college, role: "student" });
+
+    // Calculate profile completion for each student
+    const profileDetails = students.map((student) => ({
+      id: student._id,
+      name: `${student.profile.firstName || ""} ${student.profile.lastName || ""}`,
+      email: student.email,
+      profileCompletion: student.profileCompletion,
+    }));
+
+    res.status(200).json({ message: "Profile completion details fetched", profileDetails });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
