@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema({
     firstName: String,
     lastName: String,
     phoneNum: String,
+    userEmail: { type: String, required: true, unique: true, lowercase: true },
     collegeID: String,
     branch: { type: String, enum: ["CSE", "IT", "Aero", "Bio", "Mech", "EE", "ECE"] },
     year: { type: String, enum: ["1st", "2nd", "3rd", "4th"], default: "4th" }, // New field
