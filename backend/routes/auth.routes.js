@@ -7,9 +7,13 @@ import {
   listUsersOfCollege,
   updateStudentProfile, // New controller for updating student profile
   deleteStudent,
+  fetchUserById,
+  updateProfilePic,
+  getProfileCompletionDetails
 } from "../controller/user.controller.js";
 import { protect, authorizeRoles } from "../middleware/auth.middleware.js";
 import { checkSubscription } from "../middleware/checkSubscription.middleware.js";
+import upload from "../cloud/multerConfig.js";
 
 const router = express.Router();
 
@@ -28,8 +32,7 @@ router.post(
 // Student Updates Their Own Profile
 router.put(
   "/update-profile/:studentId",
-  protect,
-  authorizeRoles("student", "tnp_admin"), // Both Student and TNP Admin can update
+  protect, // Both Student and TNP Admin can update
   updateStudentProfile
 );
 
@@ -52,5 +55,15 @@ router.delete(
   authorizeRoles("tnp_admin"),
   deleteStudent
 );
+
+// Fetch User by ID
+router.get("/user/:userId", protect, fetchUserById);
+
+
+router.put('/updateProfilePic',  protect, upload.single('profilePic'), updateProfilePic);
+
+// Route for getting profile completion details (accessible by TNP Admin and self)
+router.get('/get-profile-completion', protect, getProfileCompletionDetails);
+
 
 export default router;

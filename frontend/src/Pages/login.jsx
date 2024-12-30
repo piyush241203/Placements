@@ -1,33 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { loginUser } from "../redux/userSlice";
 import college from "../assets/college.png";
 import harit from "../assets/harit.png";
 import { FaUserCog } from "react-icons/fa";
 import back from "../assets/back.png";
-import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../redux/userSlice";
-import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const loading = useSelector(state => state.user.loading);
-  const {  error, user } = useSelector((state) => state.user);
+  const { loading, error, user } = useSelector((state) => state.user);
 
-  const handleLogin = (e) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(loginUser(email, password));
+    dispatch(loginUser({ email, password }));
   };
 
-  // Redirect to /job after successful login
-  if (user) {
-    navigate("/job"); // Redirect to the job page if the user is logged in
-  }
+  useEffect(() => {
+    if (error) {
+      console.error("Backend error:", error);
+      toast.error(`Login failed: ${error}`, { position: "top-center" });
+    }
+    if (user) {
+      toast.success("Login successful!", { position: "top-center" });
+      navigate("/home");
+    }
+  }, [error, user, navigate]);
 
   return (
     <div className="bg-sky-300/20 min-h-screen flex flex-col">
-      {/* Header */}
       <header className="bg-[rgb(22,22,59)] text-white py-4 px-6 flex justify-between items-center">
         <div className="flex items-center">
           <img
@@ -55,9 +62,7 @@ const Login = () => {
         </a>
       </div>
 
-      {/* Main Content */}
       <main className="flex-grow flex justify-center items-center relative">
-        {/* Background Image */}
         <div className="absolute inset-0 flex justify-center items-center -z-10">
           <img
             src={back}
@@ -65,27 +70,25 @@ const Login = () => {
             className="w-[1200px] h-full object-center"
           />
         </div>
-
-        {/* Glassy Transparent Layer */}
         <div className="absolute inset-0 bg-white bg-opacity-5 backdrop-blur-sm -z-10"></div>
 
-        {/* Login Card */}
-        <form onSubmit={handleLogin} className="bg-white bg-opacity-80 backdrop-blur-sm p-8 rounded-3xl shadow-lg w-full max-w-md space-y-6 z-10">
+        <form
+          className="bg-white bg-opacity-80 backdrop-blur-sm p-8 rounded-3xl shadow-lg w-full max-w-md space-y-6 z-10"
+          onSubmit={handleSubmit}
+        >
           <div className="flex justify-center mb-4">
-            <button className="font-bold border-b-2  border-black">
-              Log in
-            </button>
+            <button className="font-bold border-b-2 border-black">Log in</button>
           </div>
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700 mb-3">
               Email or phone
             </label>
             <input
-               type="email"
-               value={email}
-               onChange={(e) => setEmail(e.target.value)}
-               placeholder="Email"
-               required
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              required
               className="w-full p-2 rounded bg-sky-100"
             />
           </div>
@@ -103,12 +106,39 @@ const Login = () => {
             />
           </div>
           <div className="flex justify-between items-center mb-4">
-            {/* Log In Button */}
-            <button type="submit" disabled={loading} className="px-6 py-2 bg-sky-400 text-white font-semibold rounded-lg shadow-md hover:bg-sky-600 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400">
-            {loading ? "Loading..." : "Login"}
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2 bg-sky-400 text-white font-semibold rounded-lg shadow-md hover:bg-sky-600 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center justify-center"
+            >
+              {loading ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 mr-2 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8z"
+                    ></path>
+                  </svg>
+                  Logging in...
+                </>
+              ) : (
+                "Login"
+              )}
             </button>
-
-            {/* Forgot password link */}
             <a
               href="#"
               className="text-gray-700 hover:text-blue-700 font-medium text-sm"
@@ -117,13 +147,11 @@ const Login = () => {
             </a>
           </div>
         </form>
-        {error && <div className="error">{error}</div>}
       </main>
 
-      {/* Footer */}
-      <footer className="px-3  py-4 bg-transparent justify-start items-start">
-        <p className="text-xs ">
-          Made by <span className="text-red-500 ">❤️</span>{" "}
+      <footer className="px-3 py-4 bg-transparent justify-start items-start">
+        <p className="text-xs">
+          Made by <span className="text-red-500">❤️</span>{" "}
           <span className="text-xs font-bold">Harit Tech Solution</span>
         </p>
       </footer>

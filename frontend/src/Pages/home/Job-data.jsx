@@ -1,69 +1,32 @@
-import React from "react";
-import { useState } from "react";
-import { FaSearch, FaHeart } from "react-icons/fa";
-
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getEligibleJobs } from "../../redux/jobSlice"; // Adjust the path as necessary
+import { Link } from "react-router-dom"; // Import Link
+import { FaSearch } from "react-icons/fa";
 import { ChevronDown, SlidersHorizontal, Search } from "lucide-react";
 
 export function JobData() {
-  const [role, setRole] = useState("Web Designer UI/UX");
-  const [location, setLocation] = useState("Nagpur");
+  const dispatch = useDispatch();
+  const { jobs, loading, error } = useSelector((state) => state.jobs);
 
-  const jobCards = [
-    {
-      company: "Amazon",
-      logo: "/logo/amazon.jpg",
-      position: "Web Designer",
-      postedTime: "6 h ago",
-      tags: ["CSE/IT", "Full-Time", "Senior"],
-      location: "Nagpur, Sita Burdi",
-      workType: "Remote/Office",
-      seatsRemaining: 20,
-    },
-    {
-      company: "Phone Pay",
-      logo: "/logo/phonepay.jpeg",
-      position: "UI/UX Designer",
-      postedTime: "2 d ago",
-      tags: ["CSE", "Full-Time/Part-Time", "Middle"],
-      location: "Nagpur, Mohagaon",
-      workType: "Office",
-      seatsRemaining: 2,
-    },
-    {
-      company: "Google",
-      logo: "/logo/google.png",
-      position: "UI/UX Designer",
-      postedTime: "5 d ago",
-      tags: ["CSE", "Full-Time/Part-Time", "Middle"],
-      location: "Nagpur, Mohagaon",
-      workType: "Office",
-      seatsRemaining: 0,
-    },
-    {
-      company: "Tcs",
-      logo: "/logo/tcs.jpeg",
-      position: "Web Designer",
-      postedTime: "6 h ago",
-      tags: ["CSE/IT", "Full-Time", "Senior"],
-      location: "Nagpur, Sita Burdi",
-      workType: "Remote/Office",
-      seatsRemaining: 20,
-    },
-  ];
+  // Fetch eligible jobs on component mount
+  useEffect(() => {
+    dispatch(getEligibleJobs());
+  }, [dispatch]);
 
   return (
     <main className="flex-1 p-6 bg-transparent">
       {/* Search Filter Bar */}
-      <div className=" bg-gradient-to-b bg-transparent pb-4 pt-2 flex items-center justify-center">
+      <div className="bg-gradient-to-b bg-transparent pb-4 pt-2 flex items-center justify-center">
         <div className="w-full max-w-2xl bg-[#EDE5E5] backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-2 shadow-lg">
           <div className="flex items-center gap-2 flex-1">
             <Search className="w-5 h-5 text-gray-400" />
             <div className="flex items-center gap-1 border-r pr-2">
-              <span className="text-gray-700">{role}</span>
+              <span className="text-gray-700">Role</span>
               <ChevronDown className="w-4 h-4 text-gray-400" />
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-gray-700">{location}</span>
+              <span className="text-gray-700">Location</span>
               <ChevronDown className="w-4 h-4 text-gray-400" />
             </div>
           </div>
@@ -79,87 +42,81 @@ export function JobData() {
       </div>
 
       {/* Job Cards */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {jobCards.map((job, index) => (
-          <div
-            className="relative p-4 bg-[#EDE5E5] shadow-sm rounded-lg"
-            key={index}
-          >
-            {/* Favorite Button */}
-            <button
-              className="absolute right-4 top-4 text-gray-400 hover:text-red-500"
-              aria-label="Favorite"
+      {loading ? (
+        <div className="text-center text-gray-600">Loading...</div>
+      ) : error ? (
+        <div className="text-center text-red-600">Error: {error.message}</div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {jobs.filter(job => job.type === "job").map((job) => (
+            <div
+              key={job._id}
+              className="relative p-4 bg-[#D9D9D9] shadow-sm rounded-lg"
             >
-              <FaHeart />
-            </button>
-            <div className="mb-4 flex items-start gap-4">
-              {/* Company Logo */}
-              <img
-                src={job.logo}
-                alt={`${job.company} logo`}
-                className="h-16 w-16 rounded-lg"
-              />
-              <div>
-                <h3 className="text-lg font-semibold">{job.position}</h3>
-                <p className="text-sm text-gray-600">
-                  in {job.company} • {job.postedTime}
-                </p>
-              </div>
-            </div>
-            {/* Tags */}
-            <div className="mb-4 flex flex-wrap gap-2">
-              {job.tags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="rounded-full bg-slate-200 px-3 py-1 text-sm"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-            {/* Location and Work Type */}
-            <div className="mb-4 flex flex-wrap gap-2">
-              <span className="rounded-full bg-slate-200 px-3 py-1 text-sm">
-                {job.location}
-              </span>
-              <span className="rounded-full bg-slate-200 px-3 py-1 text-sm">
-                {job.workType}
-              </span>
-            </div>
-            {/* Seats Remaining and Call to Action */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-600">• 3.5LPA - 5LPA</p>
-              <div className="flex items-center gap-4">
-                <div className="relative h-12 w-12">
-                  <div
-                    className="absolute inset-0 rounded-full border-4 border-gray-200"
-                    style={{
-                      clipPath: `polygon(0 0, 100% 0, 100% 100%, 0% 100%)`,
-                      transform: "rotate(-90deg)",
-                    }}
-                  />
-                  <div
-                    className="absolute inset-0 rounded-full border-4 border-blue-500"
-                    style={{
-                      clipPath: `polygon(0 0, ${job.seatsRemaining}% 0, ${job.seatsRemaining}% 100%, 0% 100%)`,
-                      transform: "rotate(-90deg)",
-                    }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center text-xs">
-                    {job.seatsRemaining}%
-                  </div>
+              <div className="mb-4 flex items-start gap-4">
+                {/* Company Logo */}
+                <img
+                  src={`${job.logo}`|| "default-logo.png"}// Update with your dynamic logo path
+                  alt={`${job.company} logo`}
+                  className="h-16 w-16 rounded-lg object-fill"
+                />
+                <div>
+                  <h3 className="text-lg font-semibold">{job.title}</h3>
+                  <p className="text-sm text-gray-600">
+                    in {job.company} • {new Date(job.createdAt).toLocaleString()}
+                  </p>
                 </div>
-                <a
-                  href="/jobdetails"
+              </div>
+              {/* Job Description */}
+              <p className="text-sm text-gray-700">{job.description}</p>
+              {/* Tags and Location */}
+              <div className="mb-4 flex flex-wrap gap-2 mt-2">
+                {job.eligibilityCriteria.branches.length > 0 && (
+                  <span className="rounded-full bg-slate-200 px-3 py-1 text-sm">
+                    {job.eligibilityCriteria.branches.join(", ")}
+                  </span>
+                )}
+                <span className="rounded-full bg-slate-200 px-3 py-1 text-sm">
+                  {job.location}
+                </span>
+              </div>
+              {/* Eligibility Criteria */}
+              <div className="mb-4 flex gap-2">
+               <span className="bg-slate-200 px-3 py-1 text-sm">
+                  CGPA: {job.eligibilityCriteria.cgpa || "NA"}
+                </span>
+                <span className ="bg-slate-200 px-3 py-1 text-sm">
+                  JEE Score: {job.eligibilityCriteria.jeeScore || "NA"}
+                </span>
+                <span className="bg-slate-200 px-3 py-1 text-sm">
+                  MHT CET Score: {job.eligibilityCriteria.mhtCetScore || "NA"}
+                </span>
+                <span className="bg-slate-200 px-3 py-1 text-sm">
+                  10th %: {job.eligibilityCriteria.tenthPercentage || "NA"}
+                </span>
+                <span className="bg-slate-200 px-3 py-1 text-sm">
+                  12th %: {job.eligibilityCriteria.twelfthPercentage || "NA"}
+                </span>
+                <span className="bg-slate-200 px-3 py-1 text-sm">
+                  Semester Clear: {job.eligibilityCriteria.semesterClear ? "Yes" : "No"}
+                </span>
+              </div>
+              {/* Call to Action */}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Total Applications: {job.totalApplications}
+                </p>
+                <Link
+                  to={`/job/${job._id}`}
                   className="inline-block mt-4 px-2 py-1 border border-gray-600 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-600 hover:text-white transition-all duration-300"
                 >
                   Read More
-                </a>
+                </Link>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </main>
   );
 }

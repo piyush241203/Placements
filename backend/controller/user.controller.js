@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import  { User }  from "../models/user.model.js";
 import { College } from "../models/college.model.js";
 import dotenv from "dotenv";
+import { deleteImageFromCloudinary, uploadImageOnCloudinary } from "../cloud/cloudinary.js";
 
 dotenv.config();
 
@@ -82,16 +83,12 @@ export const loginUser = async (req, res) => {
     if (!isPasswordValid) return res.status(401).json({ message: "Invalid credentials" });
 
     // 3. Generate JWT token and set it in cookies
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "30d" });  // Check token in server logs
+    const token = jwt.sign({ id: user._id ,role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });  // Check token in server logs
 
-    res.cookie("token", token, {
-      httpOnly: true, // Secure the cookie
-      secure: process.env.NODE_ENV === "production", // HTTPS only in production
-      sameSite: "strict", // Prevent CSRF
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production',  sameSite: "Strict" // Prevents CSRF attacks
     });
 
-    res.status(200).json({ message: "Login successful", user: { id: user._id, role: user.role } });
+    res.status(200).json({ message: "Login successful", user: { id: user._id, role: user.role, token } });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -148,6 +145,32 @@ export const listUsersOfCollege = async (req, res) => {
   }
 };
 
+// Fetch user by ID
+export const fetchUserById = async (req, res) => {
+  try {
+    const { userId } = req.params; // User ID from the request params
+    
+    // Fetch the user by ID and populate necessary fields (like college and applied jobs history)
+    const user = await User.findById(userId)
+      .populate("college", "name")  // Populating the college name
+      .populate("profile.appliedJobsHistory.jobId", "title company") // Populating job history with job title and company
+     
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ 
+      message: "User details fetched successfully", 
+      user 
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message
+    });
+  }
+};
+
 export const deleteStudent = async (req, res) => {
   const { studentId } = req.params;
 
@@ -173,10 +196,44 @@ export const deleteStudent = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
+
 };
 
 // Middleware to ensure the user is a student
 const isStudent = (user) => user.role === "student";
+
+export const updateProfilePic = async (req, res) => {
+  try {
+    const userId = req.user._id; // Assuming user is authenticated and the user ID is available in req.user
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete the previous profile picture from Cloudinary if exists
+    if (user.profile.profilePic) {
+      await deleteImageFromCloudinary(user.profile.profilePic);
+    }
+
+    // Upload the new profile picture to Cloudinary
+    const result = await uploadImageOnCloudinary(req.file.path);
+
+    // Update the user profile with the new profile picture URL
+    user.profile.profilePic = result.secure_url;
+
+    await user.save();
+    
+    res.status(200).json({
+      message: "Profile picture updated successfully",
+      profilePic: result.secure_url,
+    });
+  } catch (error) {
+    console.error("Error updating profile picture:", error);
+    res.status(500).json({ message: "Failed to update profile picture" });
+  }
+};
+
 
 // Update Student Profile
 export const updateStudentProfile = async (req, res) => {
@@ -226,26 +283,52 @@ export const updateStudentProfile = async (req, res) => {
 
 
 // TNP Admin Dashboard - View Student Profile Completion
+// TNP Admin or user can view profile completion details
 export const getProfileCompletionDetails = async (req, res) => {
   try {
-    // Ensure the user is a TNP Admin
-    if (req.user.role !== "tnp_admin") {
-      return res.status(403).json({ message: "Access denied" });
+    // Check if the request is from a TNP Admin or the user themselves
+    const userId = req.user._id;
+    const userRole = req.user.role;
+
+    // If the user is a TNP Admin, they can view any student in their college
+    if (userRole === "tnp_admin") {
+      // Fetch all students of the same college as the TNP Admin
+      const students = await User.find({ college: req.user.college, role: "student" });
+
+      // Calculate profile completion for each student
+      const profileDetails = students.map((student) => ({
+        id: student._id,
+        name: `${student.profile.firstName || ""} ${student.profile.lastName || ""}`,
+        email: student.email,
+        profileCompletion: student.profileCompletion,
+      }));
+
+      return res.status(200).json({
+        message: "Profile completion details fetched for all students",
+        profileDetails,
+      });
     }
 
-    // Fetch all students of the same college
-    const students = await User.find({ college: req.user.college, role: "student" });
+    // If the user is not a TNP Admin, they can only view their own profile completion
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-    // Calculate profile completion for each student
-    const profileDetails = students.map((student) => ({
-      id: student._id,
-      name: `${student.profile.firstName || ""} ${student.profile.lastName || ""}`,
-      email: student.email,
-      profileCompletion: student.profileCompletion,
-    }));
+    const profileCompletion = {
+      id: user._id,
+      name: `${user.profile.firstName || ""} ${user.profile.lastName || ""}`,
+      email: user.email,
+      profileCompletion: user.profileCompletion,
+    };
 
-    res.status(200).json({ message: "Profile completion details fetched", profileDetails });
+    return res.status(200).json({
+      message: "Profile completion details fetched successfully",
+      profileDetails: profileCompletion,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+

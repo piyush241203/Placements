@@ -1,12 +1,54 @@
-import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Briefcase, Bell, LogOut } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUserById, logoutUser, resetState, getProfileCompletionDetails } from "../redux/userSlice";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie";
+import { useEffect } from "react";
 
 const Sidebar = () => {
+  const { token, user, profileCompletionDetails } = useSelector((state) => state.user); // Use profileCompletionDetails from Redux state
   const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch user data if token exists and user data is not already fetched
+    if (token && !user?.profile) {
+      try {
+        const decoded = jwtDecode(token); // Decode the JWT token to get user ID
+        const userId = decoded.id;
+
+        // Dispatch fetchUserById to get the user data
+        dispatch(fetchUserById(userId));
+      } catch (error) {
+        console.error("Error decoding token", error);
+      }
+    }
+  }, [token, dispatch, user?.profile]); // Dependency array now includes user.profile to avoid re-fetching if already available
+
+  useEffect(() => {
+    // Fetch profile completion details if not already present
+    if (profileCompletionDetails.length === 0) {
+      dispatch(getProfileCompletionDetails());
+    }
+  }, [dispatch, profileCompletionDetails]);
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap(); // Dispatch the logout action
+      dispatch(resetState()); // Reset the Redux state
+      navigate("/login"); // Redirect to login page
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
+  // Calculate the progress based on profileCompletion
+  const profileCompletion = profileCompletionDetails?.profileCompletion || 0; // Default to 0 if not available
 
   return (
-    <div className="flex w-84 flex-col bg-[rgb(22,22,59)] text-[rgb(192,192,192)]">
+    <div className="flex w-84 flex-col  bg-#002146 text-[rgb(192,192,192)]">
       <div className="p-4">
         <img
           src="/harit.png"
@@ -15,25 +57,32 @@ const Sidebar = () => {
           height={80}
           className="mb-8"
         />
-        <div className="mb-8 text-center">
-          <div className="mb-4 inline-block overflow-hidden rounded-full bg-white">
-            <img
-              src="/placeholder.svg"
-              alt="Profile picture"
-              width={120}
-              height={120}
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <h2 className="text-2xl">Hii, Mahesh!</h2>
-          <p className="text-sm text-gray-400">Your job is waiting for you!...</p>
-          <div className="mt-4 text-sm">
-            <p>Student ID: TBT221234</p>
-            <p>Branch: CSE</p>
-            <p>
-              Year / Sem: 4<sup>th</sup> year / 8<sup>th</sup> sem
+        <div className=" text-white p-2 rounded-lg flex items-center space-x-4">
+          <img
+            src={user?.profile?.profilePic || "/placeholder.svg"}
+            alt="Profile picture of a student"
+            className="w-28 h-28 rounded-full object-cover"
+          />
+          <div className="space-y-2">
+            <p className="text-sm">
+              <span className="font-bold">Branch :</span>{" "}
+              {user?.profile?.branch}
+            </p>
+            <p className="text-sm">
+              <span className="font-bold">Student ID :</span>{" "}
+              {user?.profile?.collegeID}
+            </p>
+            <p className="text-sm">
+              <span className="font-bold">Year / Sem :</span>{" "}
+              {user?.profile?.year} year / {user?.profile?.semester} sem
             </p>
           </div>
+        </div>
+        <div className=" justify-center mt-3 font-semibold text-start p-2 items-center space-y-1 mb-6">
+          <h2 className="text-2xl">Hii, {user?.profile?.firstName}!</h2>
+          <p className="text-sm text-gray-400">
+            Your job is waiting for you!...
+          </p>
         </div>
         <nav className="space-y-4">
           <NavLink
@@ -48,7 +97,9 @@ const Sidebar = () => {
           <NavLink
             to="/internship"
             className={`flex items-center gap-3 rounded-lg px-4 py-2 hover:bg-white/10 ${
-              location.pathname === "/internship" ? "border-b-2 border-white" : ""
+              location.pathname === "/internship"
+                ? "border-b-2 border-white"
+                : ""
             }`}
           >
             <Briefcase className="h-5 w-5" />
@@ -73,25 +124,51 @@ const Sidebar = () => {
             Notification
           </NavLink>
         </nav>
-      </div>
-      <div className="mt-auto p-4">
-        <div className="mb-4">
-          <div className="relative mx-auto h-40 w-40">
-            <div className="absolute inset-0 rounded-full border-8 border-gray-700" />
+
+        <div className="mb-4 mt-12 ">
+          <div className="relative mx-auto h-40 w-40 transform hover:scale-105 transition-transform duration-200">
+            {/* Background Circle */}
+            <div className="absolute inset-0 rounded-full border-[2px] border-gray-600 bg-gray-200" />
+            {/* Progress Circle with Glow */}
             <div
-              className="absolute inset-0 rounded-full border-8 border-blue-500"
+              className="absolute inset-0 rounded-full"
               style={{
-                clipPath: "polygon(0 0, 60% 0, 60% 100%, 0% 100%)",
-                transform: "rotate(-90deg)",
+                background: `conic-gradient(
+                  rgba(99, 102, 241, 1) 0%,
+                  rgba(99, 102, 241, 1) ${profileCompletion}%,
+                  #e5e7eb ${profileCompletion}%,
+                  #e5e7eb 100%
+                )`,
+                clipPath: "circle(50% at 50% 50%)",
+                boxShadow: "0px 0px 10px rgba(99, 102, 241, 0.8)",
               }}
             />
+            {/* Inner Circle */}
+            <div className="absolute inset-[10%] rounded-full border-[2px] border-gray-600 bg-gray-200 shadow-lg" />
+            {/* Center Content */}
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold">60%</span>
-              <span className="text-xs">Profile Completed</span>
+              <span className="text-3xl font-bold text-sky-600">{profileCompletion}%</span>
+              <span className="text-xs font-semibold text-gray-600 tracking-wide">
+                Profile Completed
+              </span>
             </div>
           </div>
         </div>
-        <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/10 px-4 py-2 text-sm hover:bg-white/20">
+      </div>
+
+      <div className="mt-auto p-4">
+        {/* circle */}
+        <div className="px-3 py-4 bg-transparent justify-start items-start">
+          <p className="text-xs">
+            Made by <span className="text-red-500">❤️</span>{" "}
+            <span className="text-xs font-bold">Harit Tech Solution</span>
+          </p>
+        </div>
+
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/10 px-4 py-2 text-sm hover:bg-white/20"
+        >
           <LogOut className="h-4 w-4" />
           Logout
         </button>

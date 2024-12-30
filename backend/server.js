@@ -21,7 +21,6 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:3000'
-  
 ];
 
 app.use(cors({
@@ -41,7 +40,6 @@ app.use(cors({
 // Middleware
 app.use(cookieParser());
 app.use(bodyParser.json()); // Parse JSON bodies
-app.use(cors()); // Enable CORS
 app.use(morgan("dev")); // Log HTTP requests for better debugging
 
 // Routes
