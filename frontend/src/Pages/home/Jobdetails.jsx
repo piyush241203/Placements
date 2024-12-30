@@ -1,50 +1,43 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getEligibleJobs } from "../../redux/jobSlice";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const JobDetails = () => {
-  const { jobId } = useParams(); // Get the jobId from the URL
-  const [jobDetails, setJobDetails] = useState(null);
-
-  const jobs = [
-    {
-      id: 1,
-      title: "Web Designer",
-      company: "Amazon Web Services",
-      location: "Sita Burdi, Nagpur",
-      employmentType: "Full-Time",
-      description:
-        "As a Web Developer at Amazon, you will collaborate with cross-functional teams to design, develop, and maintain Amazon’s web applications and services.",
-      aboutCompany:
-        "Amazon Web Services is a subsidiary of Amazon providing on-demand cloud computing platforms.",
-      roleSummary:
-        "Design, develop, and maintain web applications for Amazon Web Services.",
-    },
-    {
-      id: 2,
-      title: "UI/UX Designer",
-      company: "BeReal",
-      location: "Nagpur, Maharashtra",
-      employmentType: "Part-Time",
-      description:
-        "Collaborate with designers to craft intuitive user interfaces that solve real-world problems while improving user experience.",
-      aboutCompany:
-        "BeReal is a social media company focused on real-time sharing.",
-      roleSummary:
-        "Work with teams to design user-friendly, innovative interfaces.",
-    },
-    // Additional jobs here
-  ];
+  const { jobId } = useParams();
+  const dispatch = useDispatch();
+  const { jobs, loading, error } = useSelector((state) => state.jobs);
 
   useEffect(() => {
-    const job = jobs.find((job) => job.id === parseInt(jobId)); // Find job by ID
-    setJobDetails(job);
-  }, [jobId]);
+    dispatch(getEligibleJobs());
+  }, [dispatch]);
 
-  if (!jobDetails) {
+  const jobDetails = jobs.find((job) => job._id === jobId);
+
+  if (loading) {
     return <p>Loading job details...</p>;
   }
+
+  if (error) {
+    return <p>Error: {error.message}</p>;
+  }
+
+  if (!jobDetails) {
+    return <p>No job details found.</p>;
+  }
+
+  const {
+    title,
+    description,
+    company,
+    location,
+    type,
+    eligibilityCriteria,
+    totalApplications,
+    createdAt,
+  } = jobDetails;
 
   return (
     <AnimatePresence>
@@ -62,86 +55,113 @@ const JobDetails = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
             transition={{ type: "spring", damping: 20 }}
-            className="fixed right-0 top-0 z-50 h-full w-full max-w-xl bg-[#EDE5E5] p-6 shadow-lg"
+            className="fixed right-0 top-0 z-50 h-full w-full max-w-2xl bg-white p-6 shadow-lg rounded-lg"
           >
             <div className="relative h-full">
               <button
                 onClick={() => window.history.back()}
-                className="absolute right-0 top-0 p-2 text-gray-500 hover:text-gray-700"
+                className="absolute right-4 top-4 p-2 text-gray-600 hover:text-gray-800"
               >
-                <X className="h-5 w-5" />
+                <X className="h-6 w-6" />
               </button>
 
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-orange-100">
-                  <img
-                    src="/amazon.jpg?height=48&width=48"
-                    alt="Company logo"
-                    className="h-full w-full object-contain p-2"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-semibold">
-                    {jobDetails.company}
-                  </h2>
-                  <p className="text-lg">{jobDetails.title}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Location: {jobDetails.location}
-                  </p>
-                </div>
-                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                  Apply
-                </button>
-              </div>
-
-              <div className="mt-6 space-y-4">
-                <div>
-                  <h3 className="font-medium">Job Description:</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {jobDetails.description}
-                  </p>
+              <div className="flex flex-col gap-6">
+                {/* Header Section */}
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 bg-gray-100 rounded-full flex items-center justify-center">
+                    <img
+                      src={jobDetails.logo || "/placeholder-logo.png"}
+                      alt="Company logo"
+                      className="h-12 w-12 object-contain"
+                    />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold">{company}</h1>
+                    <p className="text-lg text-gray-700">{title}</p>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="font-medium">Job Title:</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {jobDetails.title}
-                  </p>
+                {/* Details Section */}
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium text-gray-800">Description:</h3>
+                    <p className="text-gray-600">{description}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="font-medium text-gray-800">Location:</h3>
+                      <p className="text-gray-600">{location}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-800">Type:</h3>
+                      <p className="text-gray-600">{type}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-800">Applications:</h3>
+                      <p className="text-gray-600">{totalApplications}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-800">Posted On:</h3>
+                      <p className="text-gray-600">
+                        {new Date(createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="font-medium">Location:</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {jobDetails.location}
-                  </p>
+                {/* Eligibility Criteria */}
+                <div className="space-y-4">
+                  <h3 className="font-medium text-gray-800">Eligibility Criteria:</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-medium text-gray-700">Branches:</h4>
+                      <p className="text-gray-600">
+                        {eligibilityCriteria.branches.join(", ")}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-700">Gender:</h4>
+                      <p className="text-gray-600">{eligibilityCriteria.gender}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-700">CGPA:</h4>
+                      <p className="text-gray-600">{eligibilityCriteria.cgpa}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-700">Session:</h4>
+                      <p className="text-gray-600">{eligibilityCriteria.session}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-700">JEE Score:</h4>
+                      <p className="text-gray-600">{eligibilityCriteria.jeeScore}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-700">MHT CET Score:</h4>
+                      <p className="text-gray-600">
+                        {eligibilityCriteria.mhtCetScore}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-700">10th %:</h4>
+                      <p className="text-gray-600">
+                        {eligibilityCriteria.tenthPercentage}%
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-700">12th %:</h4>
+                      <p className="text-gray-600">
+                        {eligibilityCriteria.twelfthPercentage}%
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="font-medium">Company:</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {jobDetails.company}
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-medium">Employment Type:</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {jobDetails.employmentType}
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-medium">About {jobDetails.company}:</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {jobDetails.aboutCompany}
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-medium">Role Summary:</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {jobDetails.roleSummary}
-                  </p>
+                {/* Footer Section */}
+                <div className="mt-4">
+                  <button className="px-6 py-3 bg-blue-500 text-white font-medium rounded hover:bg-blue-600">
+                    Apply Now
+                  </button>
                 </div>
               </div>
             </div>

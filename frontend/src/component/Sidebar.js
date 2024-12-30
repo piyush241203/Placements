@@ -48,7 +48,7 @@ const Sidebar = () => {
   const profileCompletion = profileCompletionDetails?.profileCompletion || 0; // Default to 0 if not available
 
   return (
-    <div className="flex w-84 flex-col  bg-#002146 text-[rgb(192,192,192)]">
+    <div className="flex w-84 flex-col  bg-transparent text-[rgb(192,192,192)]">
       <div className="p-4">
         <img
           src="/harit.png"

@@ -1,31 +1,34 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { useSelector } from "react-redux";
 import Sidebar from "./component/Sidebar";
 import Home from "./Pages/home/home";
 import Job from "./Pages/home/Job";
 import Notification from "./Pages/home/Notification";
 import Login from "./Pages/login";
-import { ToastContainer } from "react-toastify"; // Toast notifications
-import "react-toastify/dist/ReactToastify.css"; // Toast styles
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import GAdminRoutes from "./Routes/GAdminRoutes";
-import Cookies from "js-cookie"; // Import js-cookie library
-import { jwtDecode } from "jwt-decode"; // Import jwt-decode to decode token
+import Cookies from "js-cookie";
+import {jwtDecode} from "jwt-decode"; // Fix import for jwt-decode
 import JobDetails from "./Pages/home/Jobdetails";
 import { Internship } from "./Pages/home/Internship";
+import TAdminRoutes from "./Routes/TAdminRoutes";
 
 function App() {
-  const { token } = useSelector((state) => state.user); // Redux token state
+  const { token } = useSelector((state) => state.user);
 
-  
-  // Effect to set background color based on user role (not on login page)
   useEffect(() => {
     if (window.location.pathname !== "/login") {
       const tokenFromCookies = Cookies.get("token") || token;
       if (tokenFromCookies) {
         try {
           const decoded = jwtDecode(tokenFromCookies);
-          // Set background color based on user role
           if (decoded.role === "student") {
             document.body.style.backgroundColor = "rgb(22, 22, 59)";
           } else if (decoded.role === "global_admin") {
@@ -35,51 +38,60 @@ function App() {
           console.error("Error decoding token:", error);
         }
       } else {
-        document.body.style.backgroundColor = "rgb(22, 22, 59)"; // Default background for guest users
+        document.body.style.backgroundColor = "rgb(22, 22, 59)";
       }
     }
-  }, [token]); // Add token as a dependency to re-run when token changes
+  }, [token]);
 
-  // Protected Route Component
-  const ProtectedRoute = ({ children }) => {
-    const isAuthenticated = token || Cookies.get("token"); // Check Redux and cookies
-    return isAuthenticated ? children : <Navigate to="/login" />;
+  const ProtectedRoute = ({ children, allowedRoles }) => {
+    const tokenFromCookies = Cookies.get("token") || token;
+    if (!tokenFromCookies) return <Navigate to="/login" />;
+    try {
+      const decoded = jwtDecode(tokenFromCookies);
+      if (allowedRoles.includes(decoded.role)) {
+        return children;
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+    return <Navigate to="/" />;
   };
 
-  // Function to check the user's role
   const checkUserRole = () => {
     const tokenFromCookies = Cookies.get("token") || token;
     if (tokenFromCookies) {
       try {
         const decoded = jwtDecode(tokenFromCookies);
         if (decoded && decoded.role) {
-          if (decoded.role === "student") {
-            return "/job"; // Navigate to job if role is student
-          } else if (decoded.role === "global_admin") {
-            return "/gadmin/dashboard"; // Navigate to global admin dashboard if role is global_admin
-          }
+          if (decoded.role === "student") return "/";
+          else if (decoded.role === "global_admin") return "/gadmin/dashboard";
+          else if (decoded.role === "tnp_admin") return "/tadmin/dashboard";
         }
       } catch (error) {
         console.error("Error decoding token:", error);
       }
     }
-    return "/login"; // Default to login if no valid role
+    return "/login";
   };
 
   return (
     <Router>
-      {/* Toast Notifications */}
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
-
       <Routes>
-        {/* Login Page (Public Route) */}
-        <Route path="/login" element={!token && !Cookies.get("token") ? <Login /> : <Navigate to={checkUserRole()} />} />
-
-        {/* Protected Routes */}
+        <Route
+          path="/login"
+          element={
+            !token && !Cookies.get("token") ? (
+              <Login />
+            ) : (
+              <Navigate to={checkUserRole()} />
+            )
+          }
+        />
         <Route
           path="/"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["student", "tnp_admin", "global_admin"]}>
               <div className="flex">
                 <Sidebar />
                 <main className="flex-1 bg-gray-200 p-3 rounded-l-3xl">
@@ -92,7 +104,7 @@ function App() {
         <Route
           path="/job"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["student", "tnp_admin", "global_admin"]}>
               <div className="flex">
                 <Sidebar />
                 <main className="flex-1 bg-[#A3B5C0] p-6 rounded-l-3xl">
@@ -105,20 +117,20 @@ function App() {
         <Route
           path="/job/:jobId"
           element={
-            
+            <ProtectedRoute allowedRoles={["student", "tnp_admin", "global_admin"]}>
               <div className="flex">
                 <Sidebar />
                 <main className="flex-1 bg-[#A3B5C0] p-6 rounded-l-3xl">
                   <JobDetails />
                 </main>
               </div>
-            
+            </ProtectedRoute>
           }
         />
         <Route
           path="/internship"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["student", "tnp_admin", "global_admin"]}>
               <div className="flex">
                 <Sidebar />
                 <main className="flex-1 bg-[#A3B5C0] p-6 rounded-l-3xl">
@@ -131,7 +143,7 @@ function App() {
         <Route
           path="/notify"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["student", "tnp_admin", "global_admin"]}>
               <div className="flex">
                 <Sidebar />
                 <main className="flex-1 bg-[#A3B5C0] p-6 rounded-l-3xl">
@@ -144,13 +156,19 @@ function App() {
         <Route
           path="/gadmin/*"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["global_admin"]}>
               <GAdminRoutes />
             </ProtectedRoute>
           }
         />
-
-        {/* Redirect unknown routes to Login */}
+        <Route
+          path="/tadmin/*"
+          element={
+            <ProtectedRoute allowedRoles={["tnp_admin"]}>
+              <TAdminRoutes />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

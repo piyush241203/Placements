@@ -33,6 +33,7 @@ const jobSchema = new mongoose.Schema(
     eligibleStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     rounds: [roundSchema], // New Field
     logo: { type: String },
+    jobDate: { type: Date, required: true },
   },
   { timestamps: true }
 );

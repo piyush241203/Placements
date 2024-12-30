@@ -18,13 +18,14 @@ function Home() {
     firstname: "",
     lastname: "",
     year: "",
+    userEmail: "",
     semester: "",
     gender: "",
     branch: "",
     tbtId: "",
     phone: "",
     dob: "",
-    session: "2024-2025",
+    session: "",
     email: "",
     address: "",
     tenthSchool: "",
@@ -78,6 +79,7 @@ function Home() {
         studentName: user.profile.firstName + " " + user.profile.lastName || "",
         firstname: user.profile.firstName || "",
         lastname: user.profile.lastName || "",
+        userEmail: user.profile.userEmail || "",
         branch: user.profile.branch || "",
         year: user.profile.year || "",
         semester: user.profile.semester || "",
@@ -116,16 +118,16 @@ function Home() {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    
+
     // Handle nested currentStatus fields
-    if (id.startsWith('currentStatus.')) {
-      const field = id.split('.')[1];
+    if (id.startsWith("currentStatus.")) {
+      const field = id.split(".")[1];
       setFormData((prev) => ({
         ...prev,
         currentStatus: {
           ...prev.currentStatus,
-          [field]: value
-        }
+          [field]: value,
+        },
       }));
     } else {
       // Handle regular fields
@@ -222,6 +224,7 @@ function Home() {
           firstName: formData.firstname,
           lastName: formData.lastname,
           phoneNum: formData.phone,
+          userEmail: formData.userEmail,
           collegeID: formData.tbtId,
           session: formData.session, // Include session in updates
           gender: formData.gender, // Add this line
@@ -305,600 +308,632 @@ function Home() {
   return (
     <div className="min-h-screen bg-gray-200 py-6 px-4">
       {loading ? ( // Add this conditional rendering
-      <div className="text-center text-gray-600">Loading...</div>
-    ) : (
-      <div className="w-full mx-auto border-[2px] border-gray-600 bg-opacity-40 bg-white backdrop-blur-md rounded-lg shadow-lg p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <div className="relative h-32 w-32 overflow-hidden border-[3px] border-gray-600 rounded-full bg-gray-200 group">
-              {/* Profile Picture */}
-              <img
-                src={user?.profile?.profilePic || "/default-profile.png"}
-                alt="Profile"
-                className="h-full w-full object-cover"
-              />
+        <div className="text-center text-gray-600">Loading...</div>
+      ) : (
+        <div className="w-full mx-auto border-[2px] border-gray-600 bg-opacity-40 bg-white backdrop-blur-md rounded-lg shadow-lg p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <div className="relative h-32 w-32 overflow-hidden border-[3px] border-gray-600 rounded-full bg-gray-200 group">
+                {/* Profile Picture */}
+                <img
+                  src={user?.profile?.profilePic || "/default-profile.png"}
+                  alt="Profile"
+                  className="h-full w-full object-cover"
+                />
 
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ">
-                <label
-                  htmlFor="profilePicInput"
-                  className="flex flex-col items-center cursor-pointer text-white"
-                >
-                  <IoImagesOutline className="font-bold text-2xl" />
-                  <span className="text-lg font-semibold">Upload</span>
-                </label>
-              </div>
-
-              {/* Progress Bar */}
-              {uploadProgress > 0 && (
-                <div className="absolute inset-0 bg-black bg-opacity-75 flex flex-col items-center justify-center">
-                  <span className="text-white mb-2 text-sm font-semibold animate-pulse">
-                    {uploadProgress}%
-                  </span>
-                  <div className="w-3/4 bg-gray-300 rounded-full h-6 shadow-inner">
-                    <div
-                      className="bg-gradient-to-r from-green-400 to-green-600 h-6 rounded-full shadow-md transition-all"
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
-                  </div>
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ">
+                  <label
+                    htmlFor="profilePicInput"
+                    className="flex flex-col items-center cursor-pointer text-white"
+                  >
+                    <IoImagesOutline className="font-bold text-2xl" />
+                    <span className="text-lg font-semibold">Upload</span>
+                  </label>
                 </div>
-              )}
 
+                {/* Progress Bar */}
+                {uploadProgress > 0 && (
+                  <div className="absolute inset-0 bg-black bg-opacity-75 flex flex-col items-center justify-center">
+                    <span className="text-white mb-2 text-sm font-semibold animate-pulse">
+                      {uploadProgress}%
+                    </span>
+                    <div className="w-3/4 bg-gray-300 rounded-full h-6 shadow-inner">
+                      <div
+                        className="bg-gradient-to-r from-green-400 to-green-600 h-6 rounded-full shadow-md transition-all"
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+
+                <input
+                  id="profilePicInput"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePicChange}
+                  className="hidden"
+                />
+              </div>
+
+              <div>
+                <h1 className="text-3xl font-bold text-gray-800">
+                  {formData.studentName}
+                </h1>
+                <div className="">
+                  <span className=" font-bold text-xs text-blue-600">
+                    {formData.email}
+                  </span>{" "}
+                  <p className="text-md mt-1 font-bold text-gray-600">
+                    {formData.branch}{" "}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={toggleEditMode}
+              className={`${
+                isEditing
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-blue-600 hover:bg-blue-700"
+              } text-white py-2 px-4 rounded transition`}
+            >
+              {isEditing ? "Save Changes" : "Edit Profile"}
+            </button>
+          </div>
+
+          {/* Profile Details */}
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
+            <div>
+              <label className="block text-md font-semibold text-gray-700">
+                First Name <span className="text-red-500">*</span>
+              </label>
               <input
-                id="profilePicInput"
-                type="file"
-                accept="image/*"
-                onChange={handleProfilePicChange}
-                className="hidden"
+                id="firstname"
+                value={formData.firstname}
+                onChange={handleChange}
+                disabled={!isEditing}
+                required //
+                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+            <div>
+              <label className="block text-md font-semibold text-gray-700">
+                Last Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="lastname"
+                value={formData.lastname}
+                onChange={handleChange}
+                disabled={!isEditing}
+                required //
+                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
               />
             </div>
 
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">
-                {formData.studentName}
-              </h1>
+              <label className="block text-md font-semibold text-gray-700">
+                Own Email <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="userEmail"
+                value={formData.userEmail}
+                onChange={handleChange}
+                disabled={!isEditing}
+                required // This makes the field required
+                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+
+            <div>
+              <label className="block text-md font-semibold text-gray-700">
+                Current Year
+              </label>
+              <input
+                id="year"
+                value={formData.year}
+                onChange={handleChange}
+                disabled={!isEditing}
+                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+            <div>
+              <label className="block text-md font-semibold text-gray-700">
+                Current Semester
+              </label>
+              <input
+                id="semester"
+                value={formData.semester}
+                onChange={handleChange}
+                disabled={!isEditing}
+                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+
+            <div>
+              <label className="block text-md font-semibold text-gray-700">
+                Session <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="session"
+                value={formData.session}
+                onChange={handleChange}
+                disabled={!isEditing}
+                required //
+                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+              >
+                <option value="2023-2024">2023-2024</option>
+                <option value="2024-2025">2024-2025</option>
+                <option value="2025-2026">2025-2026</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-md font-semibold text-gray-700">
+                College ID <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="tbtId"
+                value={formData.tbtId}
+                onChange={handleChange}
+                disabled={!isEditing}
+                required //
+                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+            <div>
+              <label className="block text-md font-semibold text-gray-700">
+                Phone Number <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                disabled={!isEditing}
+                required //
+                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+            <div>
+              <label className="block text-md font-semibold text-gray-700">
+                Branch <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="branch"
+                value={formData.branch}
+                onChange={handleChange}
+                disabled={!isEditing}
+                required //
+                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+              >
+                <option value="">Select Branch</option>
+                <option value="CSE">CSE</option>
+                <option value="IT">IT</option>
+                <option value="Aero">Aero</option>
+                <option value="Bio">Bio</option>
+                <option value="Mech">Mech</option>
+                <option value="EE">EE</option>
+                <option value="ECE">ECE</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-md font-semibold text-gray-700">
+                Gender <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="gender"
+                value={formData.gender} // Ensure to add gender to formData state
+                onChange={handleChange}
+                disabled={!isEditing}
+                required //
+                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+              >
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-md font-semibold text-gray-700">
+                Date of Birth <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="dob"
+                type="date"
+                value={formData.dob}
+                onChange={handleChange}
+                disabled={!isEditing}
+                required //
+                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+          </div>
+
+          {/* Academic Details */}
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Academic Details
+            </h2>
+            <div className="grid grid-cols-2 gap-6 mt-4">
+              <div>
+                <label className="block text-md font-semibold text-gray-700">
+                  10th School
+                </label>
+                <input
+                  id="tenthSchool"
+                  value={formData.tenthSchool}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+                />
+              </div>
+
+              <div>
+                <label className="block text-md font-semibold text-gray-700">
+                  10th Score
+                </label>
+                <input
+                  id="tenthScore"
+                  value={formData.tenthScore}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+                />
+              </div>
+
+              <div>
+                <label className="block text-md font-semibold text-gray-700">
+                  12th School
+                </label>
+                <input
+                  id="twelfthSchool"
+                  value={formData.twelfthSchool}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+                />
+              </div>
+
+              <div>
+                <label className="block text-md font-semibold text-gray-700">
+                  12th Score
+                </label>
+                <input
+                  id="twelfthScore"
+                  value={formData.twelfthScore}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+                />
+              </div>
+
+              <div>
+                <label className="block text-md font-semibold text-gray-700">
+                  JEE Score
+                </label>
+                <input
+                  id="jee"
+                  value={formData.jee}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+                />
+              </div>
+
+              <div>
+                <label className=" block text-md font-semibold text-gray-700">
+                  MHT CET Score
+                </label>
+                <input
+                  id="mhtcet"
+                  value={formData.mhtcet}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+                />
+              </div>
+
+              {/* CGPA Section */}
+              {/* CGPA Section */}
+              <div>
+                <h3 className="text-md font-semibold text-gray-700">
+                  Semester-wise CGPA
+                </h3>
+                {isEditing && (
+                  <button
+                    onClick={addCgpa}
+                    className="mt-2 bg-blue-600 text-white py-1 px-2 rounded"
+                  >
+                    Add CGPA
+                  </button>
+                )}
+                <ul className="list-disc ml-6 p-2">
+                  {formData.cgpa.map((cgpaObj, index) => (
+                    <div key={index}>
+                      {isEditing
+                        ? cgpaObj.semesters.map((semesterData, semIndex) => (
+                            <div key={semIndex} className="flex items-center">
+                              <input
+                                type="text"
+                                value={semesterData.semester}
+                                onChange={(e) =>
+                                  handleCgpaChange(
+                                    index,
+                                    semIndex,
+                                    "semester",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Semester"
+                                className="border border-gray-300 rounded p-1 mr-2"
+                              />
+                              <input
+                                type="number"
+                                value={semesterData.cgpa}
+                                onChange={(e) =>
+                                  handleCgpaChange(
+                                    index,
+                                    semIndex,
+                                    "cgpa",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="CGPA"
+                                className="border border-gray-300 rounded p-1 mr-2"
+                              />
+                              <button
+                                onClick={() => removeCgpa(index)}
+                                className="bg-red-600 text-white py-1 px-2 rounded"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))
+                        : cgpaObj.semesters.map((semesterData, semIndex) => (
+                            <li key={semIndex}>
+                              <span className="font-normal">
+                                {semesterData.semester} Semester:{" "}
+                              </span>
+                              <span className="font-semibold text-sky-600">
+                                {semesterData.cgpa} CGPA
+                              </span>
+                            </li>
+                          ))}
+                    </div>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Backlog Section */}
               <div className="">
-                <span className=" font-bold text-xs text-blue-600">
-                  {formData.email}
-                </span>{" "}
-                <p className="text-md mt-1 font-bold text-gray-600">
-                  {formData.branch}{" "}
-                </p>
+                <h3 className="text-md font-semibold text-gray-700">
+                  Backlogs
+                </h3>
+                {isEditing && (
+                  <button
+                    onClick={addBacklog}
+                    className="mt-2 bg-blue-600 text-white py-1 px-2 rounded"
+                  >
+                    Add Backlog
+                  </button>
+                )}
+                <ul className="list-disc ml-6 p-2">
+                  {formData.backlogs.map((backlog, index) => (
+                    <div key={index} className="flex items-center">
+                      {isEditing ? (
+                        <>
+                          <input
+                            type="text"
+                            value={backlog.semester}
+                            onChange={(e) =>
+                              handleBacklogChange(
+                                index,
+                                "semester",
+                                e.target.value
+                              )
+                            }
+                            placeholder="Semester"
+                            className="border border-gray-300 rounded p-1 mr-2"
+                          />
+                          <input
+                            type="number"
+                            value={backlog.count}
+                            onChange={(e) =>
+                              handleBacklogChange(
+                                index,
+                                "count",
+                                e.target.value
+                              )
+                            }
+                            placeholder="Count"
+                            className="border border-gray-300 rounded p-1 mr-2"
+                          />
+                          <button
+                            onClick={() => removeBacklog(index)}
+                            className="bg-red-600 text-white py-1 px-2 rounded"
+                          >
+                            Remove
+                          </button>
+                        </>
+                      ) : (
+                        <li>
+                          <span className="font-normal">
+                            {backlog.semester} Semester:{" "}
+                          </span>
+                          <span className="font-semibold text-red-600">
+                            {backlog.count} backlog
+                          </span>
+                        </li>
+                      )}
+                    </div>
+                  ))}
+                </ul>
               </div>
             </div>
           </div>
-          <button
-            onClick={toggleEditMode}
-            className={`${
-              isEditing
-                ? "bg-green-600 hover:bg-green-700"
-                : "bg-blue-600 hover:bg-blue-700"
-            } text-white py-2 px-4 rounded transition`}
-          >
-            {isEditing ? "Save Changes" : "Edit Profile"}
-          </button>
-        </div>
 
-        {/* Profile Details */}
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          <div>
-            <label className="block text-md font-semibold text-gray-700">
-              First Name
-            </label>
-            <input
-              id="firstname"
-              value={formData.firstname}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-            />
-          </div>
-          <div>
-            <label className="block text-md font-semibold text-gray-700">
-              Last Name
-            </label>
-            <input
-              id="lastname"
-              value={formData.lastname}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-            />
-          </div>
-          <div>
-            <label className="block text-md font-semibold text-gray-700">
-              Current Year
-            </label>
-            <input
-              id="year"
-              value={formData.year}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-            />
-          </div>
-          <div>
-            <label className="block text-md font-semibold text-gray-700">
-              Current Semester
-            </label>
-            <input
-              id="semester"
-              value={formData.semester}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-            />
-          </div>
-
-          <div>
-            <label className="block text-md font-semibold text-gray-700">
-              Session
-            </label>
-            <select
-              id="session"
-              value={formData.session}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-            >
-              <option value="2023-2024">2023-2024</option>
-              <option value="2024-2025">2024-2025</option>
-              <option value="2025-2026">2025-2026</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-md font-semibold text-gray-700">
-              TBT ID
-            </label>
-            <input
-              id="tbtId"
-              value={formData.tbtId}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-            />
-          </div>
-          <div>
-            <label className="block text-md font-semibold text-gray-700">
-              Phone Number
-            </label>
-            <input
-              id="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-            />
-          </div>
-          <div>
-            <label className="block text-md font-semibold text-gray-700">
-              Branch
-            </label>
-            <select
-              id="branch"
-              value={formData.branch}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-            >
-              <option value="">Select Branch</option>
-              <option value="CSE">CSE</option>
-              <option value="IT">IT</option>
-              <option value="Aero">Aero</option>
-              <option value="Bio">Bio</option>
-              <option value="Mech">Mech</option>
-              <option value="EE">EE</option>
-              <option value="ECE">ECE</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-md font-semibold text-gray-700">
-              Gender
-            </label>
-            <select
-              id="gender"
-              value={formData.gender} // Ensure to add gender to formData state
-              onChange={handleChange}
-              disabled={!isEditing}
-              className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-            >
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-md font-semibold text-gray-700">
-              Date of Birth
-            </label>
-            <input
-              id="dob"
-              value={formData.dob}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-            />
-          </div>
-        </div>
-
-        {/* Academic Details */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-gray-800">Academic Details</h2>
-          <div className="grid grid-cols-2 gap-6 mt-4">
-            <div>
-              <label className="block text-md font-semibold text-gray-700">
-                10th School
-              </label>
-              <input
-                id="tenthSchool"
-                value={formData.tenthSchool}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-              />
-            </div>
-
-            <div>
-              <label className="block text-md font-semibold text-gray-700">
-                10th Score
-              </label>
-              <input
-                id="tenthScore"
-                value={formData.tenthScore}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-              />
-            </div>
-
-            <div>
-              <label className="block text-md font-semibold text-gray-700">
-                12th School
-              </label>
-              <input
-                id="twelfthSchool"
-                value={formData.twelfthSchool}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-              />
-            </div>
-
-            <div>
-              <label className="block text-md font-semibold text-gray-700">
-                12th Score
-              </label>
-              <input
-                id="twelfthScore"
-                value={formData.twelfthScore}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-              />
-            </div>
-
-            <div>
-              <label className="block text-md font-semibold text-gray-700">
-                JEE Score
-              </label>
-              <input
-                id="jee"
-                value={formData.jee}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-              />
-            </div>
-
-            <div>
-              <label className=" block text-md font-semibold text-gray-700">
-                MHT CET Score
-              </label>
-              <input
-                id="mhtcet"
-                value={formData.mhtcet}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-              />
-            </div>
-
-            {/* CGPA Section */}
-            {/* CGPA Section */}
-            <div>
-              <h3 className="text-md font-semibold text-gray-700">
-                Semester-wise CGPA
-              </h3>
-              {isEditing && (
-                <button
-                  onClick={addCgpa}
-                  className="mt-2 bg-blue-600 text-white py-1 px-2 rounded"
-                >
-                  Add CGPA
-                </button>
-              )}
-              <ul className="list-disc ml-6 p-2">
-                {formData.cgpa.map((cgpaObj, index) => (
-                  <div key={index}>
-                    {isEditing
-                      ? cgpaObj.semesters.map((semesterData, semIndex) => (
-                          <div key={semIndex} className="flex items-center">
-                            <input
-                              type="text"
-                              value={semesterData.semester}
-                              onChange={(e) =>
-                                handleCgpaChange(
-                                  index,
-                                  semIndex,
-                                  "semester",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Semester"
-                              className="border border-gray-300 rounded p-1 mr-2"
-                            />
-                            <input
-                              type="number"
-                              value={semesterData.cgpa}
-                              onChange={(e) =>
-                                handleCgpaChange(
-                                  index,
-                                  semIndex,
-                                  "cgpa",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="CGPA"
-                              className="border border-gray-300 rounded p-1 mr-2"
-                            />
-                            <button
-                              onClick={() => removeCgpa(index)}
-                              className="bg-red-600 text-white py-1 px-2 rounded"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ))
-                      : cgpaObj.semesters.map((semesterData, semIndex) => (
-                          <li key={semIndex}>
-                            <span className="font-normal">
-                              {semesterData.semester} Semester:{" "}
-                            </span>
-                            <span className="font-semibold text-sky-600">
-                              {semesterData.cgpa} CGPA
-                            </span>
-                          </li>
-                        ))}
-                  </div>
-                ))}
-              </ul>
-            </div>
-
-            {/* Backlog Section */}
-            <div className="">
-              <h3 className="text-md font-semibold text-gray-700">Backlogs</h3>
-              {isEditing && (
-                <button
-                  onClick={addBacklog}
-                  className="mt-2 bg-blue-600 text-white py-1 px-2 rounded"
-                >
-                  Add Backlog
-                </button>
-              )}
-              <ul className="list-disc ml-6 p-2">
-                {formData.backlogs.map((backlog, index) => (
-                  <div key={index} className="flex items-center">
-                    {isEditing ? (
-                      <>
-                        <input
-                          type="text"
-                          value={backlog.semester}
-                          onChange={(e) =>
-                            handleBacklogChange(
-                              index,
-                              "semester",
-                              e.target.value
-                            )
-                          }
-                          placeholder="Semester"
-                          className="border border-gray-300 rounded p-1 mr-2"
-                        />
-                        <input
-                          type="number"
-                          value={backlog.count}
-                          onChange={(e) =>
-                            handleBacklogChange(index, "count", e.target.value)
-                          }
-                          placeholder="Count"
-                          className="border border-gray-300 rounded p-1 mr-2"
-                        />
-                        <button
-                          onClick={() => removeBacklog(index)}
-                          className="bg-red-600 text-white py-1 px-2 rounded"
-                        >
-                          Remove
-                        </button>
-                      </>
-                    ) : (
-                      <li>
-                        <span className="font-normal">
-                          {backlog.semester} Semester:{" "}
-                        </span>
-                        <span className="font-semibold text-red-600">
-                          {backlog.count} backlog
-                        </span>
+          {/* Achievements and Skills */}
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Achievements & Skills
+            </h2>
+            <div className="space-y-4 mt-4">
+              <div>
+                <h3 className="block text-md font-semibold text-gray-700">
+                  Achievements
+                </h3>
+                {isEditing ? (
+                  <textarea
+                    id="achievements"
+                    value={formData.achievements}
+                    onChange={handleChange}
+                    className="w-full border rounded p-2"
+                  />
+                ) : (
+                  <ul className="list-disc ml-6 p-2">
+                    {user?.profile?.achievements?.map((achievement, index) => (
+                      <li key={index} className="text-sm">
+                        {achievement}
                       </li>
-                    )}
-                  </div>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Achievements and Skills */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Achievements & Skills
-          </h2>
-          <div className="space-y-4 mt-4">
-            <div>
-              <h3 className="block text-md font-semibold text-gray-700">
-                Achievements
-              </h3>
-              {isEditing ? (
-                <textarea
-                  id="achievements"
-                  value={formData.achievements}
-                  onChange={handleChange}
-                  className="w-full border rounded p-2"
-                />
-              ) : (
-                <ul className="list-disc ml-6 p-2">
-                  {user?.profile?.achievements?.map((achievement, index) => (
-                    <li key={index} className="text-sm">
-                      {achievement}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div>
-              <h3 className="block text-md font-semibold text-gray-700">
-                Skills
-              </h3>
-              {isEditing ? (
-                <textarea
-                  id="skills"
-                  value={formData.skills}
-                  onChange={handleChange}
-                  className="w-full border rounded p-2"
-                />
-              ) : (
-                <ul className="list-disc ml-6 p-2">
-                  {user?.profile?.skills?.map((skill, index) => (
-                    <li key={index} className="text-sm">
-                      {skill}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Current Status */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-gray-800">Current Status</h2>
-          <div className=" mt-4 grid gap-6 md:grid-cols-2">
-            <div>
-              <label className="block text-md font-semibold text-gray-700">
-                Company Name
-              </label>
-              <input
-                id="currentStatus.companyName"
-                value={formData.currentStatus.companyName}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-              />
-            </div>
-            <div>
-              <label className="block text-md font-semibold text-gray-700">
-                Position
-              </label>
-              <input
-                id="currentStatus.position"
-                value={formData.currentStatus.position}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-              />
-            </div>
-            <div>
-              <label className="block text-md font-semibold text-gray-700">
-                Duration
-              </label>
-              <input
-                id="currentStatus.duration"
-                value={formData.currentStatus.duration}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-              />
-            </div>
-            <div>
-              <label className="block text-md font-semibold text-gray-700">
-                Job Type
-              </label>
-              <input
-                id="currentStatus.jobType"
-                value={formData.currentStatus.jobType}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-              />
-            </div>
-            <div>
-              <label className="block text-md font-semibold text-gray-700">
-                Location
-              </label>
-              <input
-                id="currentStatus.location"
-                value={formData.currentStatus.location}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-              />
-            </div>
-            <div>
-              <label className="block text-md font-semibold text-gray-700">
-                Start Date
-              </label>
-              <input
-                id="currentStatus.startDate"
-                type="date"
-                value={formData.currentStatus.startDate}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-              />
-            </div>
-            <div>
-              <label className="block text-md font-semibold text-gray-700">
-                End Date
-              </label>
-              <input
-                id="currentStatus.endDate"
-                type="date"
-                value={formData.currentStatus.endDate}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Applied Jobs */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-gray-800">Applied Jobs</h2>
-          <div className="space-y-4 mt-4">
-            {user?.profile?.appliedJobsHistory?.map((job, index) => (
-              <div key={index} className="space-y-2">
-                <p className="font-medium">
-                  {job.jobId.title} at {job.jobId.company}
-                </p>
-                <p className="text-sm">
-                  Applied on: {new Date(job.appliedOn).toLocaleDateString()}
-                </p>
+                    ))}
+                  </ul>
+                )}
               </div>
-            ))}
+
+              <div>
+                <h3 className="block text-md font-semibold text-gray-700">
+                  Skills
+                </h3>
+                {isEditing ? (
+                  <textarea
+                    id="skills"
+                    value={formData.skills}
+                    onChange={handleChange}
+                    className="w-full border rounded p-2"
+                  />
+                ) : (
+                  <ul className="list-disc ml-6 p-2">
+                    {user?.profile?.skills?.map((skill, index) => (
+                      <li key={index} className="text-sm">
+                        {skill}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Current Status */}
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold text-gray-800">Current Status</h2>
+            <div className=" mt-4 grid gap-6 md:grid-cols-2">
+              <div>
+                <label className="block text-md font-semibold text-gray-700">
+                  Company Name
+                </label>
+                <input
+                  id="currentStatus.companyName"
+                  value={formData.currentStatus.companyName}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+                />
+              </div>
+              <div>
+                <label className="block text-md font-semibold text-gray-700">
+                  Position
+                </label>
+                <input
+                  id="currentStatus.position"
+                  value={formData.currentStatus.position}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+                />
+              </div>
+              <div>
+                <label className="block text-md font-semibold text-gray-700">
+                  Duration
+                </label>
+                <input
+                  id="currentStatus.duration"
+                  value={formData.currentStatus.duration}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+                />
+              </div>
+              <div>
+                <label className="block text-md font-semibold text-gray-700">
+                  Job Type
+                </label>
+                <input
+                  id="currentStatus.jobType"
+                  value={formData.currentStatus.jobType}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+                />
+              </div>
+              <div>
+                <label className="block text-md font-semibold text-gray-700">
+                  Location
+                </label>
+                <input
+                  id="currentStatus.location"
+                  value={formData.currentStatus.location}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+                />
+              </div>
+              <div>
+                <label className="block text-md font-semibold text-gray-700">
+                  Start Date
+                </label>
+                <input
+                  id="currentStatus.startDate"
+                  type="date"
+                  value={formData.currentStatus.startDate}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+                />
+              </div>
+              <div>
+                <label className="block text-md font-semibold text-gray-700">
+                  End Date
+                </label>
+                <input
+                  id="currentStatus.endDate"
+                  type="date"
+                  value={formData.currentStatus.endDate}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg p-3"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Applied Jobs */}
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold text-gray-800">Applied Jobs</h2>
+            <div className="space-y-4 mt-4">
+              {user?.profile?.appliedJobsHistory?.map((job, index) => (
+                <div key={index} className="space-y-2">
+                  <p className="font-medium">
+                    {job.jobId.title} at {job.jobId.company}
+                  </p>
+                  <p className="text-sm">
+                    Applied on: {new Date(job.appliedOn).toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-       )}
+      )}
     </div>
   );
 }
