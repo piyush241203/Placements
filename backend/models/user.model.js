@@ -22,22 +22,59 @@ const userSchema = new mongoose.Schema({
     lastName: String,
     phoneNum: String,
     collegeID: String,
-    branch: String,
-    tenthDetails: {
-      schoolName: { type: String, default: null },
-      percentage: { type: Number, default: null },
+    branch: { type: String, enum: ["CSE", "IT", "Aero", "Bio", "Mech", "EE", "ECE"] },
+    year: { type: String, enum: ["1st", "2nd", "3rd", "4th"], default: "4th" }, // New field
+    semester: { type: String, enum: ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"], default: "7th" }, // New field
+    profilePic: { type: String, default: null },
+    dob: { type: Date, default: null },
+    address: { type: String, default: null },
+    session: { type: String, enum: ["2023-2024", "2024-2025", "2025-2026"], default: "2024-2025" }, // New session field
+    gender: { type: String, enum: ["Male", "Female"], required: true, default: "Male" }, // Added gender field
+    academicRecords: {
+      diploma: {
+        collegeName: { type: String, default: "NA" },
+        percentage: { type: Number, default: null },
+      },
+      jeeScore: { type: Number, default: null },
+      mhtCetScore: { type: Number, default: null },
+      twelfth: {
+        schoolName: { type: String, default: null },
+        percentage: { type: Number, default: null },
+      },
+      tenth: {
+        schoolName: { type: String, default: null },
+        percentage: { type: Number, default: null },
+      },
+      cgpa: [
+        {
+          semesters: [
+            {
+              semester: { type: String },
+              cgpa: { type: Number, default: null },
+            },
+          ],
+        },
+      ],
+      backlogs: [
+        {
+          semester: { type: String },
+          count: { type: Number, default: 0 },
+        },
+      ],
     },
-    twelfthDetails: {
-      schoolName: { type: String, default: null },
-      percentage: { type: Number, default: null },
-    },
-    cgpa: { type: Number, default: null },
-    backlogs: { type: Number, default: 0 },
-    jeeScore: { type: Number, default: null },
     studentType: { type: String, enum: ["Regular", "DSY"], default: null },
-    diplomaPercentage: { type: Number, default: null },
     achievements: [String],
     skills: [String],
+    currentStatus: {
+      isWorking: { type: Boolean, default: false },
+      companyName: { type: String, default: null },
+      position: { type: String, default: null },
+      duration: { type: String, default: null },
+      jobType: { type: String, default: null },
+      location: { type: String, default: null },
+      startDate: { type: Date, default: null },
+      endDate: { type: Date, default: null },
+    },   
     appliedJobsHistory: [
       {
         jobId: { type: mongoose.Schema.Types.ObjectId, ref: "Job" },
@@ -58,13 +95,27 @@ const userSchema = new mongoose.Schema({
 // Virtual field for profile completion percentage
 userSchema.virtual("profileCompletion").get(function () {
   const profileFields = [
-    "firstName", "lastName", "phoneNum", "collegeID", "branch",
-    "tenthDetails.schoolName", "tenthDetails.percentage",
-    "twelfthDetails.schoolName", "twelfthDetails.percentage",
-    "cgpa", "backlogs", "jeeScore", "studentType", "achievements", "skills",
+    "firstName",
+    "lastName",
+    "phoneNum",
+    "collegeID",
+    "branch",
+    "dob",
+    "session",
+    "gender",
+    "address",
+    "academicRecords.diploma.collegeName",
+    "academicRecords.diploma.percentage",
+    "academicRecords.jeeScore",
+    "academicRecords.mhtCetScore",
+    "academicRecords.twelfth.schoolName",
+    "academicRecords.twelfth.percentage",
+    "academicRecords.tenth.schoolName",
+    "academicRecords.tenth.percentage",
   ];
   let completedFields = 0;
 
+  
   profileFields.forEach((field) => {
     const fieldParts = field.split(".");
     const value = fieldParts.reduce((acc, part) => acc?.[part], this.profile);

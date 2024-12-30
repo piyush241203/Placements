@@ -4,18 +4,19 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';  // Import Provider
-import store from './redux/store';  // Import your Redux store
+import { store, persistor } from "./redux/store";  // Import your Redux store
+import { PersistGate } from 'redux-persist/integration/react';
 
 // Get the root element
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 // Render the app with Provider to pass the Redux store
 root.render(
-  <React.StrictMode>
     <Provider store={store}>  {/* Wrap App with Provider and pass the store */}
+      <PersistGate loading={null} persistor={persistor}>
       <App />
+    </PersistGate>
     </Provider>
-  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

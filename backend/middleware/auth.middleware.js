@@ -8,6 +8,7 @@ export const protect = async (req, res, next) => {
   const token = req.cookies?.token;
 
   if (!token) {
+    console.log("No token found");  // Debugging line
     return res.status(401).json({ message: "Not authorized, no token" });
   }
 
@@ -17,6 +18,7 @@ export const protect = async (req, res, next) => {
     if (!req.user) throw new Error("User not found");
     next();
   } catch (error) {
+    console.error("Error decoding token:", error);
     res.status(401).json({ message: "Invalid token", error: error.message });
   }
 };

@@ -1,3 +1,4 @@
+import { deleteImageFromCloudinary, uploadImageOnCloudinary } from "../cloud/cloudinary.js";
 import { Job } from "../models/job.model.js";
 import { User } from "../models/user.model.js";
 
@@ -12,62 +13,62 @@ export const createJob = async (req, res) => {
       return res.status(403).json({ message: "Access denied. Only TNP Admin can create a job." });
     }
 
-    // Validate and create rounds for the job if provided
-    const rounds = [];
-    if (jobData.rounds && Array.isArray(jobData.rounds)) {
-      for (let roundData of jobData.rounds) {
-        const round = new Round(roundData); // Assuming you have a Round model
-        await round.save();
-        rounds.push(round._id);
-      }
-    }
-
-    // Construct eligibility criteria dynamically
+    // Construct eligibility criteria dynamically (same as showEligibleStudents logic)
     const eligibilityCriteria = {
       role: "student",
-      college: req.user.college, // Ensure students are from the same college
-      "profile.tenthDetails.percentage": { $gte: jobData.eligibilityCriteria.tenthPercentage },
-      "profile.twelfthDetails.percentage": { $gte: jobData.eligibilityCriteria.twelfthPercentage },
-      "profile.studentType": jobData.eligibilityCriteria.studentType,
+      college: req.user.college,
+      ...(jobData.eligibilityCriteria.branches && jobData.eligibilityCriteria.branches.length > 0 && {
+        "profile.branch": { $in: jobData.eligibilityCriteria.branches },
+      }),
+      ...(jobData.eligibilityCriteria.tenthPercentage && {
+        "profile.academicRecords.tenth.percentage": { $gte: jobData.eligibilityCriteria.tenthPercentage },
+      }),
+      ...(jobData.eligibilityCriteria.twelfthPercentage && {
+        "profile.academicRecords.twelfth.percentage": { $gte: jobData.eligibilityCriteria.twelfthPercentage },
+      }),
+      ...(jobData.eligibilityCriteria.cgpa && {
+        "profile.academicRecords.cgpa": { $elemMatch: { semesters: { $elemMatch: { cgpa: { $gte: jobData.eligibilityCriteria.cgpa } } } } },
+      }),
+      ...(jobData.eligibilityCriteria.currentBacklogs !== undefined && {
+        "profile.academicRecords.backlogs.length": { $lte: jobData.eligibilityCriteria.currentBacklogs },
+      }),
+      ...(jobData.eligibilityCriteria.gender && {
+        "profile.gender": jobData.eligibilityCriteria.gender,
+      }),
+      ...(jobData.eligibilityCriteria.jeeScore && {
+        "profile.academicRecords.jeeScore": { $gte: jobData.eligibilityCriteria.jeeScore },
+      }),
+      ...(jobData.eligibilityCriteria.mhtCetScore && {
+        "profile.academicRecords.mhtCetScore": { $gte: jobData.eligibilityCriteria.mhtCetScore },
+      }),
+      ...(jobData.eligibilityCriteria.session && {
+        "profile.session": jobData.eligibilityCriteria.session,
+      }),
+      ...(jobData.eligibilityCriteria.year && {
+        "profile.year": jobData.eligibilityCriteria.year,
+      }),
+      ...(jobData.eligibilityCriteria.semester && {
+        "profile.semester": jobData.eligibilityCriteria.semester,
+      }),
     };
-
-    // Include branch criteria if provided
-    if (jobData.eligibilityCriteria.branch && jobData.eligibilityCriteria.branch.length > 0) {
-      eligibilityCriteria["profile.branch"] = { $in: jobData.eligibilityCriteria.branch };
-    }
-
-    // Include backlog criteria
-    if (jobData.eligibilityCriteria.semesterClear) {
-      eligibilityCriteria["profile.backlogs"] = { $lte: 0 };
-    }
 
     // Fetch eligible students based on criteria
     const eligibleStudents = await User.find(eligibilityCriteria);
 
-    // Create job with eligible students and include college, createdBy, and rounds
+    // Create job with eligible students and include college, createdBy
     const newJob = await Job.create({
       ...jobData,
-      college: req.user.college, // Automatically get the college from the authenticated user
-      createdBy: req.user._id,   // Automatically set createdBy to the authenticated user's ID
-      eligibleStudents: eligibleStudents.map((student) => student._id),
-      rounds: rounds, // Store the created rounds for this job
+      college: req.user.college,
+      createdBy: req.user._id,
+      eligibleStudents: eligibleStudents.map((student) => student._id), // Store only student IDs
     });
 
-    // Respond with the job and detailed eligible students information
-    res.status(201).json({
-      message: "Job created successfully",
-      job: {
-        ...newJob.toObject(),
-        eligibleStudents: eligibleStudents.map((student) => ({
-          _id: student._id,
-          profile: student.profile,
-        })),
-      },
-    });
+    return res.status(201).json({ message: "Job created successfully", job: newJob });
   } catch (error) {
-    res.status(500).json({ message: "Failed to create job", error: error.message });
+    return res.status(500).json({ message: "Error creating job", error: error.message });
   }
 };
+
 
 
 // GET All Jobs (TNP Admin)
@@ -121,54 +122,73 @@ export const deleteJob = async (req, res) => {
   }
 };
 
+
 // Show Eligible Students Before Creating a Job
 export const showEligibleStudents = async (req, res) => {
-    const {
-      branch,
-      tenthPercentage,
-      twelfthPercentage,
-      cgpa,
-      backlogs,
-      skills,
-      studentType,
-      diplomaPercentage,
-      jeeScore,
-      achievements,
-    } = req.body;
-  
-    try {
-      // Only TNP Admins can access this functionality
-      if (req.user.role !== "tnp_admin") {
-        return res.status(403).json({ message: "Access denied. Only TNP Admins can view eligible students." });
-      }
-  
-      // Find Eligible Students Based on Criteria
-      const eligibleStudents = await User.find({
-        role: "student",
-        college: req.user.college, // Ensure students are from the same college
-        ...(branch && { "profile.branch": branch }), // Filter by branch if provided
-        ...(tenthPercentage && { "profile.tenthDetails.percentage": { $gte: tenthPercentage } }),
-        ...(twelfthPercentage && { "profile.twelfthDetails.percentage": { $gte: twelfthPercentage } }),
-        ...(cgpa && { "profile.cgpa": { $gte: cgpa } }),
-        ...(backlogs !== undefined && { "profile.backlogs": { $lte: backlogs } }),
-        ...(skills && { "profile.skills": { $in: skills } }),
-        ...(studentType && { "profile.studentType": studentType }),
-        ...(diplomaPercentage && { "profile.diplomaPercentage": { $gte: diplomaPercentage } }),
-        ...(jeeScore && { "profile.jeeScore": { $gte: jeeScore } }),
-        ...(achievements && { "profile.achievements": { $in: achievements } }),
-      }).select(
-        "profile.firstName profile.lastName profile.email profile.branch profile.tenthDetails.profile.percentage profile.twelfthDetails.profile.percentage profile.cgpa profile.backlogs profile.skills profile.jeeScore profile.diplomaPercentage profile.studentType profile.achievements"
-      );
-  
-      res.status(200).json({
-        totalEligibleStudents: eligibleStudents.length,
-        students: eligibleStudents,
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Server error", error: error.message });
+  const {
+    branches,
+    tenthPercentage,
+    twelfthPercentage,
+    cgpa,
+    backlogs,
+    gender,
+    jeeScore,
+    mhtCetScore,
+    session, // New field
+    year,    // New field
+    semester  // New field
+  } = req.body;
+
+  try {
+    // Only TNP Admins can access this functionality
+    if (req.user.role !== "tnp_admin") {
+      return res.status(403).json({ message: "Access denied. Only TNP Admins can view eligible students." });
     }
-  };
-  
+
+    // Construct eligibility criteria
+    const eligibilityCriteria = {
+      role: "student",
+      college: req.user.college,
+      ...(branches && branches.length > 0 && { "profile.branch": { $in: branches } }),
+      ...(tenthPercentage && {
+        "profile.academicRecords.tenth.percentage": { $gte: tenthPercentage },
+      }),
+      ...(twelfthPercentage && {
+        "profile.academicRecords.twelfth.percentage": { $gte: twelfthPercentage },
+      }),
+      ...(cgpa && {
+        "profile.academicRecords.cgpa": { $elemMatch: { semesters: { $elemMatch: { cgpa: { $gte: cgpa } } } } },
+      }),
+      ...(backlogs !== undefined && {
+        "profile.academicRecords.backlogs.length": { $lte: backlogs },
+      }),
+      ...(gender && {
+        "profile.gender": gender,
+      }),
+      ...(jeeScore && {
+        "profile.academicRecords.jeeScore": { $gte: jeeScore },
+      }),
+      ...(mhtCetScore && {
+        "profile.academicRecords.mhtCetScore": { $gte: mhtCetScore },
+      }),
+      ...(session && { "profile.session": session }), // New condition for session
+    ...(year && { "profile.year": year }),         // New condition for year
+    ...(semester && { "profile.semester": semester }), // New condition for semester
+    };
+
+    // Find Eligible Students Based on Criteria
+    const eligibleStudents = await User.find(eligibilityCriteria);
+
+    return res.status(200).json({
+      totalEligibleStudents: eligibleStudents.length,
+      students: eligibleStudents,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Error fetching eligible students", error: error.message });
+  }
+};
+
+
   export const applyForJob = async (req, res) => {
     try {
       const { jobId } = req.params;
@@ -317,5 +337,51 @@ export const getNotifications = async (req, res) => {
     res.status(200).json({ notifications });
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch notifications", error: error.message });
+  }
+};
+
+export const updateLogo = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+
+    // Find the job by ID
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found." });
+    }
+
+    // Ensure the user is authorized (TNP Admin or Creator)
+    if (
+      req.user.role !== "tnp_admin" &&
+      job.createdBy.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({ message: "Unauthorized to update logo for this job." });
+    }
+
+    // Check if a file is uploaded
+    const file = req.file; // Assuming the file is passed in `req.file`
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded." });
+    }
+
+    // Delete the previous logo if it exists
+    if (job.logo) {
+      await deleteImageFromCloudinary(job.logo); // Assuming `job.logo` stores the public ID
+    }
+
+    // Upload the new logo to Cloudinary
+    const result = await uploadImageOnCloudinary(file.path);
+
+    // Update the logo field in the job document
+    job.logo = result.secure_url;
+    await job.save();
+
+    res.status(200).json({
+      message: "Logo updated successfully.",
+      logo: result.secure_url,
+    });
+  } catch (error) {
+    console.error("Error updating logo:", error);
+    res.status(500).json({ message: "Failed to update logo.", error: error.message });
   }
 };

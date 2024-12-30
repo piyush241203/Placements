@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes progress {
+    0% {
+      background: conic-gradient(#4f46e5 0%, #e5e7eb 0%);
+    }
+    100% {
+      background: conic-gradient(#4f46e5 60%, #e5e7eb 60%);
+    }
+  }
+  

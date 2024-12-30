@@ -10,8 +10,10 @@ import {
   createRounds,
   updateRoundResults,
   getNotifications,
+  updateLogo,
 } from "../controller/job.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
+import upload from "../cloud/multerConfig.js";
 
 const router = express.Router();
 
@@ -31,6 +33,6 @@ router.get("/:jobId/applied-students",protect, getAppliedStudents); // View appl
 router.post("/:jobId/rounds", protect, createRounds); // Create rounds for a job
 router.put("/:jobId/rounds/:roundId",protect, updateRoundResults); // Update round results
 router.get("/notifications", protect, getNotifications); // Get notifications for students
-
+router.put("/:jobId/logo",protect, upload.single("logo"), updateLogo);
 
 export default router;
