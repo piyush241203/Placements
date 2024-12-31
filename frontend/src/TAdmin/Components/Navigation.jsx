@@ -47,7 +47,7 @@ const Navigation = () => {
   };
 
   return (
-    <div className="sticky top-0 flex flex-col w-[30%] max-w-[420px] min-w-[220px] min-h-screen bg-[#002146] text-white p-3">
+    <div className="sticky top-0 flex flex-col w-[30%] max-w-[420px] min-w-[220px] min-h-screen h-[100vh] bg-[#002146] text-white p-3">
       <img src="/harit.png" alt="College logo" className="mt-2 w-full h-auto mb-4" />
 
       <NavLink
