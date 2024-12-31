@@ -48,7 +48,7 @@ const Sidebar = () => {
   const profileCompletion = profileCompletionDetails?.profileCompletion || 0; // Default to 0 if not available
 
   return (
-    <div className="flex w-84 flex-col  bg-transparent text-[rgb(192,192,192)]">
+    <div className=" sticky top-0 flex w-84 flex-col  bg-transparent text-[rgb(192,192,192)] h-[120vh]">
       <div className="p-4">
         <img
           src="/harit.png"
@@ -78,7 +78,7 @@ const Sidebar = () => {
             </p>
           </div>
         </div>
-        <div className=" justify-center mt-3 font-semibold text-start p-2 items-center space-y-1 mb-6">
+        <div className=" justify-center mt-3 font-semibold text-start p-2 items-center space-y-1 mb-3">
           <h2 className="text-2xl">Hii, {user?.profile?.firstName}!</h2>
           <p className="text-sm text-gray-400">
             Your job is waiting for you!...

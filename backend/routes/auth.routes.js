@@ -44,7 +44,7 @@ router.post("/logout", logoutUser);
 router.get(
   "/college/:collegeId/users",
   protect,
-  authorizeRoles("global_admin", "tnp_admin"),
+  authorizeRoles( "tnp_admin", "global_admin"),
   listUsersOfCollege
 );
 

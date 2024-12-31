@@ -1,22 +1,41 @@
-// src/utils/axiosInstance.js
 import axios from "axios";
+import Cookies from "js-cookie"; // Import Cookies for secure token handling
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: process.env.REACT_APP_API_BASE_URL || "http://localhost:5000/api", // Use environment variable or fallback
   withCredentials: true,
-  // Replace with your API URL
   headers: {
     "Content-Type": "application/json",
   },
 });
 
 // Add an interceptor to attach the token to every request
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token"); // Get token from localStorage
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = Cookies.get("token"); // Get token from cookies
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    // Handle request errors
+    return Promise.reject(error);
   }
-  return config;
-});
+);
+
+// Add a response interceptor for error handling
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle unauthorized errors globally
+    if (error.response && error.response.status === 401) {
+      // Optionally, redirect to login page or clear token
+      Cookies.remove("token", { path: "/" });
+      window.location.href = "/login"; // Redirect to login page
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default axiosInstance;
