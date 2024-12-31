@@ -12,7 +12,7 @@ const Sidebar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  useEffect(() => {
+  useEffect(() => { 
     // Fetch user data if token exists and user data is not already fetched
     if (token && !user?.profile) {
       try {
