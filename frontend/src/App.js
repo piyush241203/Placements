@@ -15,7 +15,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import GAdminRoutes from "./Routes/GAdminRoutes";
 import Cookies from "js-cookie";
-import {jwtDecode} from "jwt-decode"; // Fix import for jwt-decode
+import { jwtDecode } from "jwt-decode"; // Fix import for jwt-decode
 import JobDetails from "./Pages/home/Jobdetails";
 import { Internship } from "./Pages/home/Internship";
 import TAdminRoutes from "./Routes/TAdminRoutes";
@@ -153,6 +153,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* GAdmin Routes */}
         <Route
           path="/gadmin/*"
           element={
@@ -161,6 +162,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* TAdmin Routes */}
         <Route
           path="/tadmin/*"
           element={

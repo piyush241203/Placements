@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getEligibleJobs } from "../../redux/jobSlice";
+import { FaCheck } from "react-icons/fa6";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -34,6 +35,7 @@ const JobDetails = () => {
     company,
     location,
     type,
+    jobDate,
     eligibilityCriteria,
     totalApplications,
     createdAt,
@@ -67,102 +69,128 @@ const JobDetails = () => {
 
               <div className="flex flex-col gap-6">
                 {/* Header Section */}
-                <div className="flex items-center gap-4">
-                  <div className="h-14 w-14 bg-gray-100 rounded-full flex items-center justify-center">
+                <div className="flex items-center gap-10 p-2">
+                  <div className="h-32 w-32 bg-gray-100  rounded-full flex items-center object-cover justify-center">
                     <img
                       src={jobDetails.logo || "/placeholder-logo.png"}
                       alt="Company logo"
-                      className="h-12 w-12 object-contain"
+                      className="h-24 w-24 object-fill"
                     />
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold">{company}</h1>
-                    <p className="text-lg text-gray-700">{title}</p>
+                    <h1 className="text-lg text-gray-600 font-bold">{company}</h1>
+                    <p className="text-2xl font-bold text-gray-700">{title}</p>
+                    <div className="flex pt-2 space-x-6">
+                      <p className="text-gray-600 font-normal">{location}</p>
+                      <p className="text-green-600 font-semibold">
+                        {new Date(jobDate).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                      <div className="flex space-x-1 pl-4">
+                      <p className="text-gray-600 font-semibold">{totalApplications}</p><span className=" text-gray-500">applicants</span>
+                      </div>
+                      </div>
                   </div>
                 </div>
 
                 {/* Details Section */}
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-medium text-gray-800">Description:</h3>
-                    <p className="text-gray-600">{description}</p>
+                <div className="space-y-8 px-5">
+                  <div className=" flex text-nowrap gap-4">
+                    <div className="flex space-x-1 bg-sky-200/50 rounded-sm w-24 items-center justify-center">
+                    <FaCheck className="text-xl" /><p className="text-gray-600 font-semibold">{type}</p>
+                    </div>
+                    <div className="flex space-x-1 bg-sky-200/50 rounded-sm w-24 items-center justify-center">
+                    <FaCheck className="text-xl" /><p className="text-gray-600 font-semibold">{eligibilityCriteria.branches.join(", ")|| "All"} </p>
+                    </div>
+                    <div className="flex space-x-1 bg-sky-200/50 rounded-sm w-28 items-center justify-center">
+                    <FaCheck className="text-xl" /><p className="text-gray-600 font-semibold"> {eligibilityCriteria.gender || "Both"}</p>
+                    </div>
+                    <div className="flex space-x-1 bg-sky-200/50 rounded-sm w-28 items-center justify-center">
+                    <FaCheck className="text-xl" /><p className="text-gray-600 font-semibold">{eligibilityCriteria.session || "2024-2025"}</p>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="font-medium text-gray-800">Location:</h3>
-                      <p className="text-gray-600">{location}</p>
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-gray-800">Type:</h3>
-                      <p className="text-gray-600">{type}</p>
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-gray-800">Applications:</h3>
-                      <p className="text-gray-600">{totalApplications}</p>
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-gray-800">Posted On:</h3>
-                      <p className="text-gray-600">
-                        {new Date(createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
+                  <div className="flex space-x-6">
+                  <button className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-3xl hover:bg-blue-600 ">
+                    Apply Now
+                  </button>
+                  <button className="px-6 py-3 bg-white border-[2px] border-gray-700 text-gray-700 font-medium rounded-3xl hover:border-black hover:font-semibold">
+                    Contact
+                  </button>
+                </div>
+
                 </div>
 
                 {/* Eligibility Criteria */}
-                <div className="space-y-4">
-                  <h3 className="font-medium text-gray-800">Eligibility Criteria:</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="font-medium text-gray-700">Branches:</h4>
-                      <p className="text-gray-600">
-                        {eligibilityCriteria.branches.join(", ")}
+                <div className="space-y-4 pt-6   px-5">
+
+                  <div className="bg-stone-200/50  px-6 py-1">
+                     <h3 className="font-semibold text-gray-800 pb-3">
+                    Eligibility Criteria:
+                  </h3>
+
+                   <div className="grid grid-cols-3  gap-4 pb-6">
+                 
+                    <div className="flex space-x-1">
+                      <p className="text-gray-600 font-semibold">
+                        {eligibilityCriteria.cgpa || "NA"}
                       </p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-700">Gender:</h4>
-                      <p className="text-gray-600">{eligibilityCriteria.gender}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-700">CGPA:</h4>
-                      <p className="text-gray-600">{eligibilityCriteria.cgpa}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-700">Session:</h4>
-                      <p className="text-gray-600">{eligibilityCriteria.session}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-700">JEE Score:</h4>
-                      <p className="text-gray-600">{eligibilityCriteria.jeeScore}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-700">MHT CET Score:</h4>
-                      <p className="text-gray-600">
-                        {eligibilityCriteria.mhtCetScore}
+                      <h4 className="font-normal text-gray-700">Min CGPA</h4>
+                      </div>
+
+                      <div className="flex space-x-1">
+                      <p className="text-gray-600 font-semibold">
+                        {eligibilityCriteria.jeeScore || "NA"}
                       </p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-700">10th %:</h4>
-                      <p className="text-gray-600">
-                        {eligibilityCriteria.tenthPercentage}%
+                      <h4 className="font-normal text-gray-700">Min JEE</h4>
+                      </div>
+
+                      <div className="flex space-x-1">
+                      <p className="text-gray-600 font-semibold">
+                        {eligibilityCriteria.mhtCetScore || "NA"} 
                       </p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-700">12th %:</h4>
-                      <p className="text-gray-600">
-                        {eligibilityCriteria.twelfthPercentage}%
+                      <h4 className="font-normal text-gray-700">Min  MHT-CET</h4>
+                      </div>
+
+                      <div className="flex space-x-1">
+                      <p className="text-gray-600 font-semibold">
+                        {eligibilityCriteria.tenthPercentage  || "NA"}%
                       </p>
-                    </div>
+                      <h4 className="font-normal text-gray-700">Min  10th </h4>
+                      </div>
+
+                      <div className="flex space-x-1">
+                      <p className="text-gray-600 font-semibold">
+                        {eligibilityCriteria.twelfthPercentage || "NA"}%
+                      </p>
+                      <h4 className="font-normal text-gray-700">Min  12th </h4>
+                      </div>
+
                   </div>
+
+                  </div>
+                 
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-800">About the Job</h3>
+                    <p className="text-gray-600">{description}</p>
+                  </div>
+                  <div className="flex space-x-1 justify-items-end pt-5">
+                      <h3 className="font-semibold text-gray-800">Posted On:</h3>
+                      <p className="text-gray-600">
+                         {new Date(createdAt).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
                 </div>
 
                 {/* Footer Section */}
-                <div className="mt-4">
-                  <button className="px-6 py-3 bg-blue-500 text-white font-medium rounded hover:bg-blue-600">
-                    Apply Now
-                  </button>
-                </div>
+                
               </div>
             </div>
           </motion.div>
