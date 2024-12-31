@@ -7,6 +7,7 @@ import {
 } from "../../redux/userSlice";
 import { jwtDecode } from "jwt-decode";
 import { IoImagesOutline } from "react-icons/io5";
+import { MdModeEdit } from "react-icons/md";
 import { toast } from "react-toastify";
 
 function Home() {
@@ -375,10 +376,10 @@ function Home() {
               className={`${
                 isEditing
                   ? "bg-green-600 hover:bg-green-700"
-                  : "bg-blue-600 hover:bg-blue-700"
-              } text-white py-2 px-4 rounded transition`}
+                  : " hover:bg-gray-200"
+              } text-gray-800 text-2xl text-center font-bold py-2 px-4 rounded-lg w-10 h-10 transition`}
             >
-              {isEditing ? "Save Changes" : "Edit Profile"}
+              {isEditing ? "Save Changes" : <MdModeEdit className="" />}
             </button>
           </div>
 
