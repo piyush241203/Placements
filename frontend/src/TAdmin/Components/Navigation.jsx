@@ -128,15 +128,18 @@ const Navigation = () => {
         </NavLink>
       </nav>
 
-      <div className="mt-[130px] text-center">
+      <div className="mt-7 text-start">
+      <p className="text-xs my-3">
+            Made by <span className="text-red-500">❤️</span>{" "}
+            <span className="text-xs font-bold">Harit Tech Solution</span>
+          </p>
         <button
           onClick={handleLogout}
           className="w-full flex items-center justify-center gap-5 px-5 py-2 text-lg font-bold text-gray-300 bg-gray-500/20 rounded-lg hover:bg-gray-500/30"
         >
           Log Out <HiOutlineLogout />
         </button>
-        <p className="mt-5 text-sm font-bold text-[#dddddd]">Made with ❤️ By HarIT Tech Solution</p>
-      </div>
+         </div>
     </div>
   );
 };

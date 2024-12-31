@@ -4,15 +4,30 @@ import { toast } from "react-toastify";
 import {jwtDecode} from "jwt-decode"; // Fix incorrect import
 import Header from "../Components/Header";
 import Content from "../Components/Content";
+import { useNavigate } from "react-router-dom";
 import { FaRegUserCircle } from "react-icons/fa";
 import { listUsersOfCollege } from "../../redux/userSlice";
 
-function Users({filterCriteria}) {
+function Users() {
   const dispatch = useDispatch();
+  const navigate = useNavigate(); // St
   const { token, collegeUsers, status, error } = useSelector((state) => state.user);
   const [loading, setLoading] = useState(false);
   const isFetching = useRef(false); // Use ref to persist fetching state
+  const [filterCriteria, setFilterCriteria] = useState({
+    branch: "",
+    cgpa: "",
+    gender: "",
+    semester: "",
+    tenthPercent: "",
+    twelfthPercent: "",
+  });
 
+  const onFilterChange = (newFilter) => {
+    setFilterCriteria(newFilter);
+  };
+
+  
   useEffect(() => {
     if (token && !isFetching.current) {
       const fetchCollegeUsers = async () => {
@@ -49,6 +64,10 @@ function Users({filterCriteria}) {
       if (filterCriteria.branch && user.profile?.branch !== filterCriteria.branch) return false;
       if (filterCriteria.year && user.profile?.year !== filterCriteria.year) return false;
       if (filterCriteria.cgpa && user.profile?.academicRecords?.cgpa?.[0]?.semesters?.[0]?.cgpa < filterCriteria.cgpa) return false;
+      if (filterCriteria.semester && user.profile?.semester !== filterCriteria.semester) return false;
+      if (filterCriteria.tenthPercent && user.profile?.academicRecords?.twelfth?.percentage !== filterCriteria.tenthPercent) return false;
+      if (filterCriteria.twelfthPercent && user.profile?.academicRecords?.tenth?.percentage !== filterCriteria.twelfthPercent) return false;
+      if (filterCriteria.gender && user.profile?.gender !== filterCriteria.gender) return false;
     }
 
     return true;
@@ -64,10 +83,13 @@ function Users({filterCriteria}) {
     return () => clearTimeout(timeout);
   }, [token]);
   
+  const handleUserClick = (userId) => {
+    navigate(`/tadmin/userprofile/${userId}`); // Step 3: Navigate to UserProfile with userId
+  };
 
   return (
     <div className="relative flex flex-col flex-1 bg-[#A3B5C0] min-h-screen rounded-l-[35px]">
-      <Header />
+      <Header filterCriteria={filterCriteria} onFilterChange={onFilterChange}/>
       <Content />
       {loading ? (
         <div className="flex justify-center items-center min-h-[50vh]">
@@ -84,6 +106,7 @@ function Users({filterCriteria}) {
               <thead className="bg-[#cdd9e1a7]">
                 <tr>
                   <th className="text-left p-4 text-sm font-bold">Name</th>
+                  <th className="text-left p-4 text-sm font-bold">College ID</th>
                   <th className="text-left p-4 text-sm font-bold">Branch</th>
                   <th className="text-left p-4 text-sm font-bold">Year/Sem</th>
                   <th className="text-left p-4 text-sm font-bold">CGPA</th>
@@ -93,7 +116,7 @@ function Users({filterCriteria}) {
               <tbody>
                 {filteredUsers.map((user, index) => (
                   <tr
-                    key={user._id}
+                    key={user._id} onClick={() => handleUserClick(user._id)} 
                     className={`${
                       index % 2 === 0 ? "bg-[#cdd9e165]" : ""
                     } hover:bg-[#ffffff82] hover:backdrop-blur-sm hover:shadow-lg cursor-pointer`}
@@ -101,6 +124,9 @@ function Users({filterCriteria}) {
                     <td className="flex items-center gap-2 p-3 border border-[#cdd9e1bc]">
                       <img src={user.profile?.profilePic} alt="img" className="w-10 h-10 mr-3 object-cover text-center font-semibold text-sm transition-all border-gray-300 hover:bg-opacity-20 hover:backdrop-blur-sm hover:bg-white text-red-400 rounded-3xl shadow-sm" />
                       {`${user.profile?.firstName || ""} ${user.profile?.lastName || ""}`}
+                    </td>
+                    <td className="p-3 border border-[#cdd9e1bc]">
+                      {user.profile?.collegeID || "N/A"}
                     </td>
                     <td className="p-3 border border-[#cdd9e1bc]">
                       {user.profile?.branch || "N/A"}
