@@ -18,9 +18,9 @@ const jobSchema = new mongoose.Schema(
     college: { type: mongoose.Schema.Types.ObjectId, ref: "College", required: true },
     eligibilityCriteria: {
       branches: { type: [String], enum: ["CSE", "IT", "Aero", "Bio", "Mech", "EE", "ECE"]  },
-      gender: { type: String, enum: ["Male", "Female"] },
+      gender: { type: [String], enum: ["Male", "Female"] },
       cgpa: { type: Number  },
-      session: {type: String, enum: ["2023-2024", "2024-2025", "2025-2026"], default: "2024-2025"},
+      session: {type: [String], enum: ["2023-2024", "2024-2025", "2025-2026"], default: "2024-2025"},
       jeeScore: { type: Number  },
       mhtCetScore : { type: Number  },
       tenthPercentage: { type: Number, default: 0 },

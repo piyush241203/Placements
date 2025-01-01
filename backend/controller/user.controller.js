@@ -153,7 +153,7 @@ export const fetchUserById = async (req, res) => {
     // Fetch the user by ID and populate necessary fields (like college and applied jobs history)
     const user = await User.findById(userId)
       .populate("college", "name")  // Populating the college name
-      .populate("profile.appliedJobsHistory.jobId", "title company") // Populating job history with job title and company
+      .populate("profile.appliedJobsHistory.jobId", "title company location type description logo") // Populating job history with job title and company
      
     if (!user) {
       return res.status(404).json({ message: "User not found" });

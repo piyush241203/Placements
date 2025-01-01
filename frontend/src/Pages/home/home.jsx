@@ -314,7 +314,7 @@ function Home() {
         <div className="w-full mx-auto border-[2px] border-gray-600 bg-opacity-40 bg-white backdrop-blur-md rounded-lg shadow-lg p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <div className="relative h-32 w-32 overflow-hidden border-[3px] border-gray-600 rounded-full bg-gray-200 group">
+              <div className="relative h-32 w-32 overflow-hidden border-[3px] border-gray-600 rounded-md bg-gray-200 group">
                 {/* Profile Picture */}
                 <img
                   src={user?.profile?.profilePic || "/default-profile.png"}

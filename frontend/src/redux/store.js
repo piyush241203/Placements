@@ -6,8 +6,9 @@ import jobsReducer from "./jobSlice"; // Import the jobs reducer
 
 // Persist config
 const persistConfig = {
-  key: "root",
+  key: "userToken", // Unique key for the persisted state
   storage,
+  whitelist: ["token"], // Only persist the 'token' field from the user state
 };
 
 // Persist user reducer
