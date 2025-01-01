@@ -8,6 +8,7 @@ import Posts from "../TAdmin/Pages/PostsPage/PostsPage";
 import Status from "../TAdmin/Pages/StatusPage";
 import Feedback from "../TAdmin/Pages/FeedbackPage";
 import Profile from "../TAdmin/Pages/ProfilePage";
+import StatusUser from '../TAdmin/Pages/StatutsUser';
 
 function TAdminRoutes() {
   return (
@@ -17,7 +18,7 @@ function TAdminRoutes() {
           path="dashboard"
           element={
             <div className="flex">
-              <Navigation/>
+              <Navigation />
               <main className="flex-1 bg-[#002146] ">
                 <Dashboard />
               </main>
@@ -37,12 +38,24 @@ function TAdminRoutes() {
         />
 
         <Route
+          path="status-user"
+          element={
+            <div className="flex">
+              <Navigation />
+              <main className="flex-1 bg-[#002146]">
+                < StatusUser/>
+              </main>
+            </div>
+          }
+        />
+
+        <Route
           path="userprofile/:userId"
           element={
             <div className="flex">
               <Navigation />
               <main className="flex-1 bg-[#002146]">
-                < Usersprofile/>
+                <Usersprofile />
               </main>
             </div>
           }
