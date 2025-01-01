@@ -63,6 +63,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Internal server error", error: err.message });
 });
 
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store"); // Prevent caching
+  next();
+});
+
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

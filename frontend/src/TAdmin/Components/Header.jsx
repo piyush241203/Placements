@@ -2,45 +2,33 @@ import React, { useState } from "react";
 import { FaSearchengin } from "react-icons/fa6";
 import { MdTune } from "react-icons/md";
 
-const Header = () => {
+const Header = ({filterCriteria, onFilterChange}) => {
   const [showFilter, setShowFilter] = useState(false);
-  const [filters, setFilters] = useState({
-    branch: "",
-    cgpa: "",
-    gender: "",
-    semester: "",
-    tenthPercent: "",
-    twelfthPercent: "",
-  });
 
-  const toggleFilter = () => {
-    setShowFilter(!showFilter);
-  };
+  const toggleFilter = () => setShowFilter(!showFilter);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const applyFilter = () => {
-    console.log("Filters applied:", filters);
-    setShowFilter(false);
+    onFilterChange({ ...filterCriteria, [name]: value });
   };
 
   const clearFilters = () => {
-    setFilters({
+    const clearedFilters = {
       branch: "",
       cgpa: "",
       gender: "",
       semester: "",
       tenthPercent: "",
       twelfthPercent: "",
-    });
+    };
+    onFilterChange(clearedFilters);
     setShowFilter(false);
   };
+
+  const applyFilter = () => {
+    setShowFilter(false);
+  };
+
 
   return (
     <>
@@ -67,7 +55,7 @@ const Header = () => {
               <label className="font-semibold text-sm">Branch:</label>
               <select
                 name="branch"
-                value={filters.branch}
+                value={filterCriteria.branch}
                 onChange={handleInputChange}
                 className="flex-1 py-1 px-2 border-b-2 border-[#215669C1] rounded-md bg-transparent text-[rgb(22,22,59)] placeholder-[#215669C1] focus:outline-none focus:border-[rgb(22,22,59)]"
               >
@@ -89,7 +77,7 @@ const Header = () => {
                 placeholder="Enter CGPA"
                 min="0"
                 max="10"
-                value={filters.cgpa}
+                value={filterCriteria.cgpa}
                 onChange={handleInputChange}
                 onInput={(e) => {
                   if (e.target.value > 10) e.target.value = 10;
@@ -102,19 +90,19 @@ const Header = () => {
               <label className="font-semibold text-sm">Semester:</label>
               <select
                 name="semester"
-                value={filters.semester}
+                value={filterCriteria.semester}
                 onChange={handleInputChange}
                 className="flex-1 py-1 px-2 border-b-2 border-[#215669C1] rounded-md bg-transparent text-[rgb(22,22,59)] focus:outline-none placeholder-[#215669C1] focus:border-[rgb(22,22,59)]"
               >
                 <option value="">Select Semester</option>
-                <option value="1">1st Sem</option>
-                <option value="2">2nd Sem</option>
-                <option value="3">3rd Sem</option>
-                <option value="4">4th Sem</option>
-                <option value="5">5th Sem</option>
-                <option value="6">6th Sem</option>
-                <option value="7">7th Sem</option>
-                <option value="8">8th Sem</option>
+                <option value="1">1st</option>
+                <option value="2">2nd</option>
+                <option value="3">3rd</option>
+                <option value="4">4th</option>
+                <option value="5">5th</option>
+                <option value="6">6th</option>
+                <option value="7">7th</option>
+                <option value="8">8th</option>
               </select>
               <label className="font-semibold text-sm">10th %:</label>
               <input
@@ -124,7 +112,7 @@ const Header = () => {
                 placeholder="Enter %"
                 min="0"
                 max="100"
-                value={filters.tenthPercent}
+                value={filterCriteria.tenthPercent}
                 onChange={handleInputChange}
                 onInput={(e) => {
                   if (e.target.value > 100) e.target.value = 100;
@@ -137,7 +125,7 @@ const Header = () => {
               <label className="font-semibold text-sm">Gender:</label>
               <select
                 name="gender"
-                value={filters.gender}
+                value={filterCriteria.gender}
                 onChange={handleInputChange}
                 className="flex-1 py-1 px-2 border-b-2 border-[#215669C1] rounded-md bg-transparent text-[rgb(22,22,59)] focus:outline-none placeholder-[#215669C1] focus:border-[rgb(22,22,59)]"
               >
@@ -153,7 +141,7 @@ const Header = () => {
                 placeholder="Enter %"
                 min="0"
                 max="100"
-                value={filters.twelfthPercent}
+                value={filterCriteria.twelfthPercent}
                 onChange={handleInputChange}
                 onInput={(e) => {
                   if (e.target.value > 100) e.target.value = 100;

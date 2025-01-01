@@ -83,7 +83,7 @@ export const loginUser = async (req, res) => {
     if (!isPasswordValid) return res.status(401).json({ message: "Invalid credentials" });
 
     // 3. Generate JWT token and set it in cookies
-    const token = jwt.sign({ id: user._id ,role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });  // Check token in server logs
+    const token = jwt.sign({ id: user._id ,role: user.role, college: user.college._id }, process.env.JWT_SECRET, { expiresIn: '30d' });  // Check token in server logs
 
     res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production',  sameSite: "Strict" // Prevents CSRF attacks
     });

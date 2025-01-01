@@ -103,6 +103,24 @@ export const updateProfilePic = createAsyncThunk(
   }
 );
 
+// Thunk for listing users of a specific college
+export const listUsersOfCollege = createAsyncThunk(
+  "user/listUsersOfCollege",
+  async (collegeId, { rejectWithValue, getState }) => {
+    const { user } = getState();
+    if (user.collegeUsers.length > 0) {
+      return user.collegeUsers; // Return cached data if available
+    }
+
+    try {
+      const response = await axiosInstance.get(`/auth/college/${collegeId}/users`);
+      return response.data.users; // Return the list of users
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || "Failed to fetch users of the college");
+    }
+  }
+);
+
 
 
 const userSlice = createSlice({
@@ -111,6 +129,7 @@ const userSlice = createSlice({
     user: null,
     token: Cookies.get("token") || null, // Fetch token from cookies
     profileCompletionDetails: [],
+    collegeUsers: [],
     status: "idle",
     error: null,
   },
@@ -119,6 +138,7 @@ const userSlice = createSlice({
       state.user = null;
       state.token = null;
       state.profileCompletionDetails = []; 
+      state.collegeUsers = [];
       state.status = "idle";
       state.error = null;
     },
@@ -172,6 +192,15 @@ const userSlice = createSlice({
       state.status = "succeeded";
     })
     .addCase(updateProfilePic.rejected, (state, action) => {
+      state.status = "failed";
+      state.error = action.payload;
+    })
+    .addCase(listUsersOfCollege.fulfilled, (state, action) => {
+      state.collegeUsers = action.payload; // Store the list of users
+      state.status = "succeeded";
+      state.error = null;
+    })
+    .addCase(listUsersOfCollege.rejected, (state, action) => {
       state.status = "failed";
       state.error = action.payload;
     });
