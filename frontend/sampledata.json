@@ -1,0 +1,110 @@
+{
+    "message": "User details fetched successfully",
+    "user": {
+        "profile": {
+            "academicRecords": {
+                "diploma": {
+                    "collegeName": "NA",
+                    "percentage": null
+                },
+                "twelfth": {
+                    "schoolName": "",
+                    "percentage": null
+                },
+                "tenth": {
+                    "schoolName": "",
+                    "percentage": null
+                },
+                "jeeScore": null,
+                "mhtCetScore": null,
+                "cgpa": [
+                    {
+                        "semesters": [
+                            {
+                                "semester": "5th",
+                                "cgpa": 5.2,
+                                "id": "67724a661fbedc657075df8a"
+                            }
+                        ],
+                        "_id": "67724a661fbedc657075df89"
+                    }
+                ],
+                "backlogs": []
+            },
+            "currentStatus": {
+                "isWorking": true,
+                "companyName": "",
+                "position": "",
+                "duration": "",
+                "jobType": "",
+                "location": "",
+                "startDate": null,
+                "endDate": null
+            },
+            "firstName": "Sopan",
+            "lastName": "Bharkad",
+            "phoneNum": "9823456789",
+            "collegeID": "ABC987",
+            "branch": "EE",
+            "year": "1st",
+            "semester": "1st",
+            "profilePic": "https://res.cloudinary.com/dihc0jxm8/image/upload/v1735543320/default/file_1735543320516.webp",
+            "dob": null,
+            "address": "",
+            "session": "2024-2025",
+            "gender": "Male",
+            "studentType": "Regular",
+            "achievements": [
+                "Winner of ABC coding competition",
+                "Top scorer in Physics"
+            ],
+            "skills": [
+                "JavaScript",
+                "C++",
+                "Data Structures",
+                "Embedded Systems"
+            ],
+            "appliedJobsHistory": [
+                {
+                    "jobId": {
+                        "_id": "67641130e3ef0cdbccd7ed5a",
+                        "title": "Software Developer",
+                        "description": "Looking for skilled developers.",
+                        "company": "HCL",
+                        "location": "Nagpur",
+                        "type": "job",
+                        "logo": "https://res.cloudinary.com/dihc0jxm8/image/upload/v1735328654/default/file_1735328653591.png"
+                    },
+                    "appliedOn": "2024-12-20T10:58:35.040Z",
+                    "roundsHistory": [],
+                    "_id": "67654ddbe4a6a7ab3df0199b"
+                },
+                {
+                    "jobId": {
+                        "_id": "67654eb9c320b17ab1012429",
+                        "title": "SOFTWARE",
+                        "description": "Looking for skilled developers.",
+                        "company": "HarIT Tech Solution",
+                        "location": "Nagpur",
+                        "type": "job",
+                        "logo": "https://res.cloudinary.com/dihc0jxm8/image/upload/v1735328246/default/file_1735328244009.jpg"
+                    },
+                    "appliedOn": "2024-12-20T11:04:10.015Z",
+                    "roundsHistory": [],
+                    "_id": "67654f2ac320b17ab101243a"
+                }
+            ]
+        },
+        "_id": "6761c142df9881075434e26e",
+        "email": "sopan@abha.com",
+        "password": "$2a$10$gEtfbzx16.bRayRmvV/hHO1drPfisN2UOi2r8NXDcKx84x7MgF4C2",
+        "role": "student",
+        "college": {
+            "_id": "67619e71d4d5f64ada26855b",
+            "name": "Abha Gaikwad-Patil College of Engineering and Technology"
+        },
+        "createdAt": "2024-12-17T18:21:54.729Z",
+        "updatedAt": "2024-12-30T07:23:18.732Z",
+        "_v": 3
+    }
+}
