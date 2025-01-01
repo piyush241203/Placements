@@ -66,7 +66,7 @@ const Navigation = () => {
               className="w-full h-full rounded-full object-cover"
             />
           </div>
-          <span className="text-2xl font-extrabold text-[#dddddd]">{user?.profile?.firstName || "Mahesh Shinde"}</span>
+          <span className="text-2xl font-extrabold text-[#dddddd]">{user?.profile?.firstName || "T&P Head"}</span>
         </header>
       </NavLink>
 
@@ -128,14 +128,14 @@ const Navigation = () => {
         </NavLink>
       </nav>
 
-      <div className="mt-7 text-start">
+      <div className=" w-[92%] absolute bottom-5 justify-items-center text-start">
       <p className="text-xs my-3">
             Made by <span className="text-red-500">❤️</span>{" "}
             <span className="text-xs font-bold">Harit Tech Solution</span>
           </p>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-5 px-5 py-2 text-lg font-bold text-gray-300 bg-gray-500/20 rounded-lg hover:bg-gray-500/30"
+          className="w-[80%] flex items-center justify-center gap-5 px-5 py-2 text-lg font-bold text-gray-300 bg-gray-500/20 rounded-lg hover:bg-gray-500/30"
         >
           Log Out <HiOutlineLogout />
         </button>

@@ -84,17 +84,14 @@ const JobCard = ({ job }) => {
                         <h4 className="text-[20px] font-bold text-[#16163b] my-[2px]">{title}</h4>
                         <p className="text-[15px] text-[#16163b]">Location: {location}</p>
                     </div>
-                    <button className="absolute top-[0px] right-[10px] flex items-center gap-1 px-2 py-0.5 pr-3 bg-[#A6C0CF] shadow-xl text-[#16163b] border border-[#517488] rounded-xl text-[15px] font-medium hover:bg-[#80a7be]">
+                    <button className="absolute top-[0px] right-[0px] flex items-center gap-1 px-2 py-0.5 pr-3 bg-[#A6C0CF] shadow-xl text-[#16163b] border border-[#517488] rounded-xl text-[15px] font-medium hover:bg-[#80a7be]">
                         <FaRankingStar /> Create Rounds
                     </button>
-                    <div className="absolute top-[35px] right-[0px] flex items-center gap-2">
-                        <button className="flex items-center gap-1 px-2 py-0.5 pr-3 bg-[#A6C0CF] shadow-md text-[#16163b] border border-[#517488] rounded-xl text-[15px] font-medium hover:bg-[#80a7be]">
-                            <MdModeEdit /> Edit
-                        </button>
-                        <button className="flex items-center gap-1 px-2 py-0.5 pr-3 bg-[#dd4d4d] shadow-md text-white border border-[#a52929] rounded-xl text-[15px] font-medium hover:bg-[#a52929]">
+                    {/* <div className="absolute top-[35px] right-[10px] flex items-center gap-2"> */}
+                        <button className="absolute top-[35px] right-[0px] flex items-center gap-1 px-2 py-0.5 pr-3 bg-[#dd4d4d] shadow-md text-white border border-[#a52929] rounded-xl text-[15px] font-medium hover:bg-[#a52929]">
                             <MdDeleteForever /> Delete
                         </button>
-                    </div>
+                    {/* </div> */}
                 </div>
                 <div className="px-4">
                     <p className="text-[15px] text-[#16163b] mb-1">Employment Type: {type}</p>

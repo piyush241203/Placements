@@ -20,7 +20,7 @@ export const loginUser = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data.message || "Login failed");
+      return rejectWithValue(error.response?.data?.message || "Login failed");
     }
   }
 );
@@ -42,24 +42,44 @@ export const logoutUser = createAsyncThunk(
 
       return {}; // Return an empty object
     } catch (error) {
-      return rejectWithValue(error.response.data.message || "Logout failed");
+      return rejectWithValue(error.response?.data?.message || "Logout failed");
     }
   }
 );
 
 
 // Thunk for fetching user by ID
+// export const fetchUserById = createAsyncThunk(
+//   "user/fetchUserById",
+//   async (userId, { rejectWithValue }) => {
+//     try {
+//       const response = await axiosInstance.get(`/auth/user/${userId}`);
+//       return response.data.user; // Ensure we are only returning the user object
+//     } catch (error) {
+//       return rejectWithValue(error.response.data.message || "Failed to fetch user");
+//     }
+//   }
+// );
 export const fetchUserById = createAsyncThunk(
-  "user/fetchUserById",
-  async (userId, { rejectWithValue }) => {
+  "user/fetchUser ById",
+  async (userId, { getState, rejectWithValue }) => {
+    const { user } = getState().user;
+
+    // Avoid API call if the user data for the given ID is already present
+    if (user && user._id === userId) {
+      return user; // Return cached user data
+    }
+
     try {
       const response = await axiosInstance.get(`/auth/user/${userId}`);
-      return response.data.user; // Ensure we are only returning the user object
+      return response.data.user; // Return fetched user data
     } catch (error) {
-      return rejectWithValue(error.response.data.message || "Failed to fetch user");
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch user");
     }
   }
 );
+
+
 
 export const getProfileCompletionDetails = createAsyncThunk(
   "user/getProfileCompletionDetails",
@@ -130,6 +150,7 @@ const userSlice = createSlice({
     token: Cookies.get("token") || null, // Fetch token from cookies
     profileCompletionDetails: [],
     collegeUsers: [],
+    student: [],
     status: "idle",
     error: null,
   },
@@ -137,6 +158,7 @@ const userSlice = createSlice({
     resetState: (state) => {
       state.user = null;
       state.token = null;
+       state.student  = [];
       state.profileCompletionDetails = []; 
       state.collegeUsers = [];
       state.status = "idle";
@@ -151,6 +173,13 @@ const userSlice = createSlice({
         state.status = "succeeded";
         state.error = null;
       })
+      .addCase(loginUser .pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(loginUser .rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload; // Debugging
+      })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.token = null;
@@ -160,12 +189,13 @@ const userSlice = createSlice({
         window.location.reload();
       })
       .addCase(fetchUserById.fulfilled, (state, action) => {
-        state.user = action.payload; // Set the fetched user data
+        state.user = action.payload; // 
+        state.student  = action.payload;                          // Set the fetched user data
         state.status = "succeeded";
         state.error = null;
       })
       .addCase(fetchUserById.rejected, (state, action) => {
-        state.status = "failed";
+       state.status = "failed";
         state.error = action.payload;
       })
       .addCase(getProfileCompletionDetails.fulfilled, (state, action) => {

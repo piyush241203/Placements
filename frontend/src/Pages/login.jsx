@@ -22,9 +22,9 @@ const Login = () => {
     dispatch(loginUser({ email, password }));
   };
 
+  // Toast Notifications and Error Handling
   useEffect(() => {
     if (error) {
-      console.error("Backend error:", error);
       toast.error(`Login failed: ${error}`, { position: "top-center" });
     }
     if (user) {

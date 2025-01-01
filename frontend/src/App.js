@@ -78,7 +78,7 @@ function App() {
   return (
     <Router>
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
-      <Routes>
+          <Routes>
         <Route
           path="/login"
           element={
@@ -175,7 +175,7 @@ function App() {
         />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
-    </Router>
+          </Router>
   );
 }
 
