@@ -90,13 +90,29 @@ function Users() {
   return (
     <div className="relative flex flex-col flex-1 bg-[#A3B5C0] min-h-screen rounded-l-[35px]">
       <Header filterCriteria={filterCriteria} onFilterChange={onFilterChange}/>
-      <Content />
+      <div className="flex justify-between mx-6 space-x-6">
+      <div className="sticky flex">
+                <h1 className="text-[28px] font-bold p-2  ml-7 text-[rgb(22,22,59)]">
+                    Students
+                </h1>
+            </div>
+
+        <div>
+        <button className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-3xl hover:bg-blue-600 ">
+                    Apply Now
+                  </button>
+                  <button className="px-6 py-3 bg-white border-[2px] border-gray-700 text-gray-700 font-medium rounded-3xl hover:border-black hover:font-semibold">
+                    Contact
+                  </button>
+        </div>
+
+                </div>
       {loading ? (
         <div className="flex justify-center items-center min-h-[50vh]">
           <span className="loader"></span>
         </div>
       ) : (
-        <div className="flex justify-center p-10">
+        <div className="flex justify-center p-6">
           {filteredUsers.length === 0 ? (
             <div className="text-center text-gray-600">
               No users found for this college.
