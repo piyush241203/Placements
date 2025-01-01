@@ -20,6 +20,7 @@ import JobDetails from "./Pages/home/Jobdetails";
 import { Internship } from "./Pages/home/Internship";
 import TAdminRoutes from "./Routes/TAdminRoutes";
 
+
 function App() {
   const { token } = useSelector((state) => state.user);
 
@@ -153,6 +154,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+       
         {/* GAdmin Routes */}
         <Route
           path="/gadmin/*"
