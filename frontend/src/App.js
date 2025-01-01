@@ -20,6 +20,7 @@ import JobDetails from "./Pages/home/Jobdetails";
 import { Internship } from "./Pages/home/Internship";
 import TAdminRoutes from "./Routes/TAdminRoutes";
 
+
 function App() {
   const { token } = useSelector((state) => state.user);
 
@@ -77,7 +78,7 @@ function App() {
   return (
     <Router>
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
-      <Routes>
+          <Routes>
         <Route
           path="/login"
           element={
@@ -153,6 +154,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+       
         {/* GAdmin Routes */}
         <Route
           path="/gadmin/*"
@@ -173,7 +175,7 @@ function App() {
         />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
-    </Router>
+          </Router>
   );
 }
 

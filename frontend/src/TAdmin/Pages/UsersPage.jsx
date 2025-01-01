@@ -3,10 +3,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import {jwtDecode} from "jwt-decode"; // Fix incorrect import
 import Header from "../Components/Header";
-import Content from "../Components/Content";
 import { useNavigate } from "react-router-dom";
-import { FaRegUserCircle } from "react-icons/fa";
 import { listUsersOfCollege } from "../../redux/userSlice";
+import { BsPersonFillAdd } from "react-icons/bs";
+import { AiFillDashboard } from "react-icons/ai";
 
 function Users() {
   const dispatch = useDispatch();
@@ -65,8 +65,8 @@ function Users() {
       if (filterCriteria.year && user.profile?.year !== filterCriteria.year) return false;
       if (filterCriteria.cgpa && user.profile?.academicRecords?.cgpa?.[0]?.semesters?.[0]?.cgpa < filterCriteria.cgpa) return false;
       if (filterCriteria.semester && user.profile?.semester !== filterCriteria.semester) return false;
-      if (filterCriteria.tenthPercent && user.profile?.academicRecords?.twelfth?.percentage !== filterCriteria.tenthPercent) return false;
-      if (filterCriteria.twelfthPercent && user.profile?.academicRecords?.tenth?.percentage !== filterCriteria.twelfthPercent) return false;
+      if (filterCriteria.tenthPercent && user.profile?.academicRecords?.twelfth?.percentage < filterCriteria.tenthPercent) return false;
+      if (filterCriteria.twelfthPercent && user.profile?.academicRecords?.tenth?.percentage < filterCriteria.twelfthPercent) return false;
       if (filterCriteria.gender && user.profile?.gender !== filterCriteria.gender) return false;
     }
 
@@ -84,29 +84,33 @@ function Users() {
   }, [token]);
   
   const handleUserClick = (userId) => {
+    // console.log();
+    
     navigate(`/tadmin/userprofile/${userId}`); // Step 3: Navigate to UserProfile with userId
   };
 
   return (
     <div className="relative flex flex-col flex-1 bg-[#A3B5C0] min-h-screen rounded-l-[35px]">
       <Header filterCriteria={filterCriteria} onFilterChange={onFilterChange}/>
-      <div className="flex justify-between mx-6 space-x-6">
-      <div className="sticky flex">
-                <h1 className="text-[28px] font-bold p-2  ml-7 text-[rgb(22,22,59)]">
-                    Students
-                </h1>
-            </div>
-
-        <div>
-        <button className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-3xl hover:bg-blue-600 ">
-                    Apply Now
-                  </button>
-                  <button className="px-6 py-3 bg-white border-[2px] border-gray-700 text-gray-700 font-medium rounded-3xl hover:border-black hover:font-semibold">
-                    Contact
-                  </button>
+      <div className="flex justify-between mx-6 space-x-6 pt-5">
+        <div className="sticky flex">
+          <h1 className="text-[28px] font-bold p-2  ml-7 text-[rgb(22,22,59)]">
+              Students
+          </h1>
         </div>
 
-                </div>
+        <div className="flex items-center ">
+          <button className="flex items-center gap-2 px-6 py-2 mr-7 bg-[#3e79a7] text-white font-semibold rounded-2xl hover:bg-[#21537a] text-[16px] ">
+            <BsPersonFillAdd className="text-[18px]"/>
+            Add User
+          </button>
+          <button className="flex items-center gap-2 px-6 py-2 mr-5 bg-[#3e79a7] text-white font-semibold rounded-2xl hover:bg-[#21537a] text-[16px]">
+          <AiFillDashboard className="text-[17px]" />
+            Status
+          </button>
+        </div>
+
+      </div>
       {loading ? (
         <div className="flex justify-center items-center min-h-[50vh]">
           <span className="loader"></span>

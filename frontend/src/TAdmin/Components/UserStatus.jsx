@@ -1,11 +1,18 @@
 import { useState } from "react";
 
-const UserStatus = () => {
+const UserStatus = ({ userStatus }) => {
+
   const [blacklistSessions, setBlacklistSessions] = useState(0);
   const [preventJobs, setPreventJobs] = useState(0);
   const [isBlacklisted, setIsBlacklisted] = useState(false);
   const [isPrevented, setIsPrevented] = useState(false);
 
+  // const { currentStatus } = user.profile;
+
+  if (!userStatus) {
+    return null;
+  }
+  
   const handleBlacklistChange = (e) => {
     setIsBlacklisted(e.target.checked);
     if (!e.target.checked) setBlacklistSessions(0);
@@ -38,25 +45,25 @@ const UserStatus = () => {
           <p className="text-[14] text-[#16163b] flex items-center mb-1">
             <strong>Working or Not:</strong>
             <h6 className="text-[14] ml-2 px-3 border-b border-[rgba(33,86,105,0.758)] bg-gradient-to-b from-transparent via-transparent to-[rgba(141,168,178,0.46)] text-[#16163b] rounded ">
-              Working
+            {userStatus.isWorking ? "Working" : "Not Working"}
             </h6>
           </p>
           <p className="text-[14] text-[#16163b] flex items-center mb-1">
             <strong>Company Name:</strong>
             <h6 className="text-[14] ml-2 px-3 border-b border-[rgba(33,86,105,0.758)] bg-gradient-to-b from-transparent via-transparent to-[rgba(141,168,178,0.46)] text-[#16163b] rounded">
-              Amazon Web Services
+            {userStatus.companyName || "NA"}
             </h6>
           </p>
           <p className="text-[14] text-[#16163b] flex items-center mb-1">
             <strong>Position:</strong>
             <h6 className="text-[14] ml-2 px-3 border-b border-[rgba(33,86,105,0.758)] bg-gradient-to-b from-transparent via-transparent to-[rgba(141,168,178,0.46)] text-[#16163b] rounded]">
-              Delivery Boy
+            {userStatus.position || "NA"}
             </h6>
           </p>
           <p className="text-[14] text-[#16163b] flex items-center mb-1">
             <strong>Duration:</strong>
             <h6 className="text-[14] ml-2 px-3 border-b border-[rgba(33,86,105,0.758)] bg-gradient-to-b from-transparent via-transparent to-[rgba(141,168,178,0.46)] text-[#16163b] rounded">
-              3 months
+            {userStatus.duration || "NA"}
             </h6>
           </p>
         </div>
@@ -64,25 +71,31 @@ const UserStatus = () => {
           <p className="text-[14] text-[#16163b] flex items-center mb-1">
             <strong>Job/Internship:</strong>
             <h6 className="text-[14] ml-2 px-3 border-b border-[rgba(33,86,105,0.758)] bg-gradient-to-b from-transparent via-transparent to-[rgba(141,168,178,0.46)] text-[#16163b] rounded">
-              Internship
+            {userStatus.jobType || "NA"}
             </h6>
           </p>
           <p className="text-[14] text-[#16163b] flex items-center mb-1">
             <strong>Location:</strong>
             <h6 className="text-[14] ml-2 px-3 border-b border-[rgba(33,86,105,0.758)] bg-gradient-to-b from-transparent via-transparent to-[rgba(141,168,178,0.46)] text-[#16163b] rounded">
-              India
+            {userStatus.location || "NA"}
             </h6>
           </p>
           <p className="text-[14] text-[#16163b] flex items-center mb-1">
             <strong>Starting/Joining date:</strong>
             <h6 className="text-[14] ml-2 px-3 border-b border-[rgba(33,86,105,0.758)] bg-gradient-to-b from-transparent via-transparent to-[rgba(141,168,178,0.46)] text-[#16163b] rounded">
-              1/11/24
+            {/* {userStatus.startDate || "NA"} */}
+            {userStatus.startDate
+                    ? new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(userStatus.startDate))
+                    : "NA"}
             </h6>
           </p>
           <p className="text-[14px] text-[#16163b] flex items-center mb-1">
             <strong>Ending date:</strong>
             <h6 className="text-[14px] ml-2 px-3 border-b border-[rgba(33,86,105,0.758)] bg-gradient-to-b from-transparent via-transparent to-[rgba(141,168,178,0.46)] text-[#16163b] rounded">
-              31/1/2025
+            {/* {userStatus.endDate || "NA"} */}
+            {userStatus.endDate
+                    ? new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(userStatus.endDate))
+                    : "NA"}
             </h6>
           </p>
         </div>
