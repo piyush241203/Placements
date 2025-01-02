@@ -9,6 +9,7 @@ import { HiOutlineLogout } from "react-icons/hi";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserById, logoutUser, resetState, getProfileCompletionDetails } from "../../redux/userSlice";
 import {jwtDecode} from "jwt-decode";
+import tnp from '../../assets/sopu.jpeg';
 
 const Navigation = () => {
   const { token, user, profileCompletionDetails } = useSelector((state) => state.user);
@@ -61,12 +62,12 @@ const Navigation = () => {
         <header className="relative p-4 flex flex-col items-center gap-2">
           <div className="w-20 h-20 rounded-full text-[#dddddd]">
             <img
-              src={user?.profile?.profilePic || "https://png.pngtree.com/png-clipart/20230927/original/pngtree-man-avatar-image-for-profile-png-image_13001882.png"}
+              src={tnp}
               alt="user-img"
               className="w-full h-full rounded-full object-cover"
             />
           </div>
-          <span className="text-2xl font-extrabold text-[#dddddd]">{user?.profile?.firstName || "T&P Head"}</span>
+          <span className="text-2xl font-extrabold text-[#dddddd]">{ "T&P Head"}</span>
         </header>
       </NavLink>
 

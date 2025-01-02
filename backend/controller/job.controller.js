@@ -200,49 +200,53 @@ export const showEligibleStudents = async (req, res) => {
 };
 
 
-  export const applyForJob = async (req, res) => {
-    try {
-      const { jobId } = req.params;
-      const studentId = req.user._id;
-  
-      const job = await Job.findById(jobId);
-      if (!job) {
-        return res.status(404).json({ message: "Job not found." });
-      }
-  
-      // Check eligibility
-      if (!job.eligibleStudents.includes(studentId)) {
-        return res.status(403).json({ message: "You are not eligible to apply for this job." });
-      }
-  
-      // Check if already applied
-      if (job.appliedStudents.includes(studentId)) {
-        return res.status(400).json({ message: "You have already applied for this job." });
-      }
-  
-      // Add student to the job's appliedStudents list
-      job.appliedStudents.push(studentId);
-      await job.save();
-  
-      // Add job to the student's appliedJobsHistory
-      const student = await User.findById(studentId);
-      if (!student) {
-        return res.status(404).json({ message: "Student not found." });
-      }
-  
-      // Add the job and its details to the user's appliedJobsHistory
-      student.profile.appliedJobsHistory.push({
-        jobId: job._id,
-        appliedOn: new Date(),
-        roundsHistory: [], // Initialize rounds history as empty
-      });
-      await student.save();
-  
-      res.status(200).json({ message: "Successfully applied for the job." });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to apply for the job", error: error.message });
+export const applyForJob = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const studentId = req.user._id;
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found." });
     }
-  };
+
+    // Check eligibility
+    if (!job.eligibleStudents.includes(studentId)) {
+      return res.status(403).json({ message: "You are not eligible to apply for this job." });
+    }
+
+    // Check if already applied
+    if (job.appliedStudents.includes(studentId)) {
+      return res.status(400).json({ message: "You have already applied for this job." });
+    }
+
+    // Add student to the job's appliedStudents list
+    job.appliedStudents.push(studentId);
+
+    // Remove student from the job's eligibleStudents list
+    job.eligibleStudents = job.eligibleStudents.filter(id => id.toString() !== studentId.toString());
+
+    await job.save();
+
+    // Add job to the student's appliedJobsHistory
+    const student = await User.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    // Add the job and its details to the user's appliedJobsHistory
+    student.profile.appliedJobsHistory.push({
+      jobId: job._id,
+      appliedOn: new Date(),
+      roundsHistory: [], // Initialize rounds history as empty
+    });
+    await student.save();
+
+    res.status(200).json({ message: "Successfully applied for the job." });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to apply for the job", error: error.message });
+  }
+};
   
   export const getAppliedStudents = async (req, res) => {
     try {

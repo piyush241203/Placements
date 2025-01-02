@@ -2,14 +2,21 @@ import React, { useState } from "react";
 import { FaSearchengin } from "react-icons/fa6";
 import { MdTune } from "react-icons/md";
 
-const Header = ({filterCriteria, onFilterChange}) => {
+const Header = ({filterCriteria, onFilterChange, onSearch}) => {
   const [showFilter, setShowFilter] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const toggleFilter = () => setShowFilter(!showFilter);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     onFilterChange({ ...filterCriteria, [name]: value });
+  };
+
+  const handleSearchChange = (e) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+    onSearch(term); // Pass the search term to the parent component
   };
 
   const clearFilters = () => {
@@ -29,6 +36,8 @@ const Header = ({filterCriteria, onFilterChange}) => {
     setShowFilter(false);
   };
 
+  
+
 
   return (
     <>
@@ -37,6 +46,7 @@ const Header = ({filterCriteria, onFilterChange}) => {
           <input
             type="text"
             placeholder="Search..."
+            onChange={handleSearchChange}
             className="w-full px-4 py-2 border-2 border-[#215669C1] rounded-full bg-[rgba(255,255,255,0)] text-[rgb(22,22,59)] text-lg placeholder-[#215669C1] focus:outline-none focus:border-[rgb(22,22,59)]"
           />
           <FaSearchengin className="absolute right-2  text-[#215669C1] text-lg " />
@@ -49,7 +59,7 @@ const Header = ({filterCriteria, onFilterChange}) => {
         </div>
       </header>
       {showFilter && (
-        <div className="absolute top-[65px] left-1/2 transform -translate-x-1/2 bg-[#ffffff8c] backdrop-blur-sm shadow-md border placeholder-[#215669C1] border-[#215669C1] rounded-md p-4 w-[450px] z-50">
+        <div className="absolute top-[65px] left-1/2 mt-1 transform -translate-x-1/2 bg-[#ffffff8c] backdrop-blur-sm shadow-md border placeholder-[#215669C1] border-[#215669C1] rounded-md p-4 w-[450px] z-50">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
               <label className="font-semibold text-sm">Branch:</label>
