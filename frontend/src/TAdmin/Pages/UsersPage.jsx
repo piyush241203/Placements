@@ -4,15 +4,18 @@ import { toast } from "react-toastify";
 import {jwtDecode} from "jwt-decode"; // Fix incorrect import
 import Header from "../Components/Header";
 import { useNavigate } from "react-router-dom";
-import { listUsersOfCollege } from "../../redux/userSlice";
+import { createStudent, listUsersOfCollege } from "../../redux/userSlice";
 import { BsPersonFillAdd } from "react-icons/bs";
 import { AiFillDashboard } from "react-icons/ai";
+import CreateStudentPopup from "../Components/CreateStudentPopup";
+import StatusSidebar from "../Components/StatusSidebar";
 
 function Users() {
   const dispatch = useDispatch();
   const navigate = useNavigate(); // St
-  const { token, collegeUsers, status, error } = useSelector((state) => state.user);
+  const { token, collegeUsers, status, error, createdStudent } = useSelector((state) => state.user);
   const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const isFetching = useRef(false); // Use ref to persist fetching state
   const [filterCriteria, setFilterCriteria] = useState({
     branch: "",
@@ -22,11 +25,47 @@ function Users() {
     tenthPercent: "",
     twelfthPercent: "",
   });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for
 
   const onFilterChange = (newFilter) => {
     setFilterCriteria(newFilter);
   };
 
+  const handleSearch = (term) => {
+    setSearchTerm(term.toLowerCase());
+  };
+
+  // In UsersPage.js
+  const handleStatusClick = () => {
+    console.log("Status button clicked"); // Check if this logs in the console
+    setIsSidebarOpen(true);
+    document.body.style.overflow = "hidden";
+  };
+  
+  // In StatusSidebar.js
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+    document.body.style.overflow = "auto"; // Restore scrolling
+  };
+
+  const handleCreateStudent = async (studentData) => {
+    try {
+      await dispatch(createStudent(studentData)).unwrap();
+      toast.success("Student created successfully!");
+      setIsOpen(false);
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleOpenPopup = () => {
+    setIsOpen(true);
+  };
+
+  const handleClosePopup = () => {
+    setIsOpen(false);
+  };
   
   useEffect(() => {
     if (token && !isFetching.current) {
@@ -57,8 +96,17 @@ function Users() {
   }, [dispatch, token]); // Minimize dependencies
   
   const filteredUsers = collegeUsers.filter((user) => {
+    
     if (user.role === "tnp_admin") return false;
 
+    // Apply search term filter
+  if (searchTerm) {
+    const fullName = `${user.profile?.firstName || ""} ${user.profile?.lastName || ""}`.toLowerCase();
+    const collegeID = user.profile?.collegeID?.toLowerCase() || "";
+    if (!fullName.includes(searchTerm) && !collegeID.includes(searchTerm)) {
+      return false;
+    }
+  }
     // Apply filter criteria
     if (filterCriteria) {
       if (filterCriteria.branch && user.profile?.branch !== filterCriteria.branch) return false;
@@ -91,7 +139,7 @@ function Users() {
 
   return (
     <div className="relative flex flex-col flex-1 bg-[#A3B5C0] min-h-screen rounded-l-[35px]">
-      <Header filterCriteria={filterCriteria} onFilterChange={onFilterChange}/>
+      <Header filterCriteria={filterCriteria} onSearch={handleSearch} onFilterChange={onFilterChange}/>
       <div className="flex justify-between mx-6 space-x-6 pt-5">
         <div className="sticky flex">
           <h1 className="text-[28px] font-bold p-2  ml-7 text-[rgb(22,22,59)]">
@@ -100,15 +148,26 @@ function Users() {
         </div>
 
         <div className="flex items-center ">
-          <button className="flex items-center gap-2 px-6 py-2 mr-7 bg-[#3e79a7] text-white font-semibold rounded-2xl hover:bg-[#21537a] text-[16px] ">
+          <button onClick={handleOpenPopup} className="flex items-center gap-2 px-6 py-2 mr-7 bg-[#3e79a7] text-white font-semibold rounded-2xl hover:bg-[#21537a] text-[16px] ">
             <BsPersonFillAdd className="text-[18px]"/>
             Add User
           </button>
-          <button className="flex items-center gap-2 px-6 py-2 mr-5 bg-[#3e79a7] text-white font-semibold rounded-2xl hover:bg-[#21537a] text-[16px]">
-          <AiFillDashboard className="text-[17px]" />
+          <button onClick={handleStatusClick} className="flex items-center gap-2 px-6 py-2 mr-5 bg-[#3e79a7] text-white font-semibold rounded-2xl hover:bg-[#21537a] text-[16px]">
+          <AiFillDashboard  className="text-[17px]" />
             Status
           </button>
         </div>
+
+        {isOpen && (
+          <CreateStudentPopup
+            isOpen={isOpen}
+            onClose={handleClosePopup}
+            onCreateStudent={handleCreateStudent}
+            status={status}
+            error={error}
+            createdStudent={createdStudent}
+          />
+        )}
 
       </div>
       {loading ? (
@@ -167,6 +226,7 @@ function Users() {
           )}
         </div>
       )}
+      <StatusSidebar isOpen={isSidebarOpen} onClose={closeSidebar} filteredUsers={filteredUsers} />
     </div>
   );
 }

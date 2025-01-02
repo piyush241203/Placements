@@ -125,3 +125,37 @@ export const toggleCollegeStatus = async (req, res) => {
     }
   };
   
+
+  // 7. Renew College Subscription
+export const renewSubscription = async (req, res) => {
+  const { id } = req.params; // College ID
+  const { endDate, planType } = req.body; // Subscription details to be updated
+
+  try {
+    const college = await College.findById(id);
+    if (!college) {
+      return res.status(404).json({ message: "College not found" });
+    }
+
+    // Ensure valid input
+    if (!endDate) {
+      return res.status(400).json({ message: "Subscription endDate is required" });
+    }
+
+    // Update subscription details
+    college.subscription.endDate = new Date(endDate); // Ensure it's a valid date
+    if (planType) college.subscription.planType = planType;
+    college.subscription.status = "active"; // Automatically set to active on renewal
+
+    await college.save();
+
+    res.status(200).json({
+      message: "Subscription renewed successfully",
+      subscription: college.subscription,
+    });
+  } catch (error) {
+    console.error("Error renewing subscription:", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+

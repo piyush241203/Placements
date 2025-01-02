@@ -1,21 +1,44 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getEligibleJobs } from "../../redux/jobSlice";
+import { applyForJob, getEligibleJobs } from "../../redux/jobSlice";
 import { FaCheck } from "react-icons/fa6";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import TermsAndConditionsPopup from "../../component/TermsAndConditionsPopup";
+import toast from "react-hot-toast";
+
 
 const JobDetails = () => {
   const { jobId } = useParams();
   const dispatch = useDispatch();
   const { jobs, loading, error } = useSelector((state) => state.jobs);
+  const [showPopup, setShowPopup] = useState(false);
+  const navigate = useNavigate(); // Initialize useNavigate
+
 
   useEffect(() => {
     dispatch(getEligibleJobs());
   }, [dispatch]);
 
   const jobDetails = jobs.find((job) => job._id === jobId);
+
+  const handleApply = () => {
+    setShowPopup(true);
+  };
+
+  const handleConfirmApply = () => {
+    dispatch(applyForJob(jobId))
+      .unwrap()
+      .then(() => {
+        setShowPopup(false);
+        toast.success("Application submitted successfully!");
+        navigate("/job"); // Navigate to "/job" after successful application
+      })
+      .catch((error) => {
+        alert(`Failed to apply: ${error.message}`);
+      });
+  };
 
   if (loading) {
     return <p>Loading job details...</p>;
@@ -132,7 +155,7 @@ const JobDetails = () => {
                   </div>
 
                   <div className="flex space-x-6 ">
-                    <button className="px-6 py-2 bg-blue-500 text-white font-bold rounded-3xl transform transition-all duration-300 hover:bg-blue-600  focus:ring-2 focus:ring-blue-400 focus:outline-none ">
+                    <button onClick={handleApply} className="px-6 py-2 bg-blue-500 text-white font-bold rounded-3xl transform transition-all duration-300 hover:bg-blue-600  focus:ring-2 focus:ring-blue-400 focus:outline-none ">
                       Apply Now
                     </button>
                     <button className="px-6 py-2  text-blue-600 rounded-3xl  hover:text-blue-800 font-semibold  border-[2px] border-blue-600 hover:border-blue-800 hover:bg-blue-50 focus:ring-1 focus:ring-blue-600 focus:outline-none ">
@@ -209,6 +232,14 @@ const JobDetails = () => {
                 {/* Footer Section */}
               </div>
             </div>
+            <AnimatePresence>
+        {showPopup && (
+          <TermsAndConditionsPopup
+            onClose={() => setShowPopup(false)}
+            onApply={handleConfirmApply}
+          />
+        )}
+      </AnimatePresence>
           </motion.div>
         </>
       )}
