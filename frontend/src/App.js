@@ -19,6 +19,7 @@ import { jwtDecode } from "jwt-decode"; // Fix import for jwt-decode
 import JobDetails from "./Pages/home/Jobdetails";
 import { Internship } from "./Pages/home/Internship";
 import TAdminRoutes from "./Routes/TAdminRoutes";
+import { Toaster } from "react-hot-toast";
 
 
 function App() {
@@ -26,7 +27,7 @@ function App() {
 
   useEffect(() => {
     if (window.location.pathname !== "/login") {
-      const tokenFromCookies = Cookies.get("token") || token;
+      const tokenFromCookies = Cookies.get("mpsp") || token;
       if (tokenFromCookies) {
         try {
           const decoded = jwtDecode(tokenFromCookies);
@@ -45,7 +46,7 @@ function App() {
   }, [token]);
 
   const ProtectedRoute = ({ children, allowedRoles }) => {
-    const tokenFromCookies = Cookies.get("token") || token;
+    const tokenFromCookies = Cookies.get("mpsp") || token;
     if (!tokenFromCookies) return <Navigate to="/login" />;
     try {
       const decoded = jwtDecode(tokenFromCookies);
@@ -55,11 +56,11 @@ function App() {
     } catch (error) {
       console.error("Error decoding token:", error);
     }
-    return <Navigate to="/" />;
+    return <Navigate to="/login" />;
   };
 
   const checkUserRole = () => {
-    const tokenFromCookies = Cookies.get("token") || token;
+    const tokenFromCookies = Cookies.get("mpsp") || token;
     if (tokenFromCookies) {
       try {
         const decoded = jwtDecode(tokenFromCookies);
@@ -77,12 +78,12 @@ function App() {
 
   return (
     <Router>
-      <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
-          <Routes>
+      <Toaster/>
+            <Routes>
         <Route
           path="/login"
           element={
-            !token && !Cookies.get("token") ? (
+            !token && !Cookies.get("mpsp") ? (
               <Login />
             ) : (
               <Navigate to={checkUserRole()} />
@@ -175,6 +176,7 @@ function App() {
         />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
+      <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
           </Router>
   );
 }
