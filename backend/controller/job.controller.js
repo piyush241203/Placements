@@ -30,7 +30,12 @@ export const createJob = async (req, res) => {
         "profile.academicRecords.cgpa": { $elemMatch: { semesters: { $elemMatch: { cgpa: { $gte: jobData.eligibilityCriteria.cgpa } } } } },
       }),
       ...(jobData.eligibilityCriteria.currentBacklogs !== undefined && {
-        "profile.academicRecords.backlogs.length": { $lte: jobData.eligibilityCriteria.currentBacklogs },
+        $expr: { 
+          $lte: [
+            { $sum: "$profile.academicRecords.backlogs.count" }, // Sum of backlog counts
+            jobData.eligibilityCriteria.currentBacklogs
+          ]
+        },
       }),
       ...(jobData.eligibilityCriteria.gender && {
         "profile.gender": jobData.eligibilityCriteria.gender,
@@ -160,8 +165,14 @@ export const showEligibleStudents = async (req, res) => {
         "profile.academicRecords.cgpa": { $elemMatch: { semesters: { $elemMatch: { cgpa: { $gte: cgpa } } } } },
       }),
       ...(backlogs !== undefined && {
-        "profile.academicRecords.backlogs.length": { $lte: backlogs },
+        $expr: {
+          $lte: [
+            { $sum: "$profile.academicRecords.backlogs.count" }, // Sum of backlog counts
+            backlogs
+          ]
+        },
       }),
+      
       ...(gender && {
         "profile.gender": gender,
       }),

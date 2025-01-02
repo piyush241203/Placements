@@ -83,7 +83,7 @@ const JobDetails = () => {
                     </h1>
                     <p className="text-2xl font-bold text-gray-700">{title}</p>
                     <div className="flex pt-2 space-x-6">
-                      <p className="text-gray-500 border-2 border-gray-400 rounded-full px-2  ">
+                      <p className="text-gray-500 font-normal  ">
                         {location}
                       </p>
                       <p className="text-green-600 font-semibold">
@@ -104,26 +104,26 @@ const JobDetails = () => {
                 </div>
 
                 {/* Details Section */}
-                <div className="space-y-8 px-5">
-                  <div className=" flex text-nowrap gap-4">
-                    <div className="flex items-center justify-center space-x-1 bg-sky-300/50 rounded-sm w-20 py-1 border border-sky-500 shadow-md">
+                <div className="space-y-8 px-8">
+                  <div className=" flex text-nowrap gap-6">
+                    <div className="flex items-center justify-center space-x-1 bg-sky-200/50 rounded-sm w-28  py-1  ">
                       <FaCheck className="text-xl" />
                       <p className="text-gray-600 font-semibold">{type}</p>
                     </div>
-                    <div className="flex items-center justify-center space-x-1 bg-sky-300/50 rounded-sm w-20 py-1 border border-sky-500 shadow-md">
+                    <div className="flex items-center justify-center space-x-1 bg-sky-200/50 rounded-sm w-28  py-1 ">
                       <FaCheck className="text-xl" />
                       <p className="text-gray-600 font-semibold">
                         {eligibilityCriteria.branches.join(", ") || "All"}{" "}
                       </p>
                     </div>
-                    <div className="flex items-center justify-center space-x-1 bg-sky-300/50 rounded-sm w-20 py-1 border border-sky-500 shadow-md">
+                    <div className="flex items-center justify-center space-x-1 bg-sky-200/50 rounded-sm w-28  py-1 ">
                       <FaCheck className="text-xl" />
                       <p className="text-gray-600 font-semibold">
                         {" "}
                         {eligibilityCriteria.gender || "Both"}
                       </p>
                     </div>
-                    <div className="flex items-center justify-center space-x-1 bg-sky-300/50 rounded-sm w-28 py-1 border border-sky-500 shadow-md">
+                    <div className="flex items-center justify-center space-x-1 bg-sky-200/50 rounded-sm w-28  py-1 ">
                       <FaCheck className="text-xl" />
                       <p className="text-gray-600 font-semibold">
                         {eligibilityCriteria.session || "2024-2025"}
@@ -131,18 +131,18 @@ const JobDetails = () => {
                     </div>
                   </div>
 
-                  <div className="flex space-x-6">
-                    <button className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-3xl transform transition-all duration-300 hover:bg-teal-500 hover:-translate-y-1 hover:scale-105 focus:ring-2 focus:ring-blue-400 focus:outline-none dark:bg-blue-700 dark:hover:bg-teal-600 ">
+                  <div className="flex space-x-6 ">
+                    <button className="px-6 py-2 bg-blue-500 text-white font-bold rounded-3xl transform transition-all duration-300 hover:bg-blue-600  focus:ring-2 focus:ring-blue-400 focus:outline-none ">
                       Apply Now
                     </button>
-                    <button className="px-6 py-3 bg-blue-500 text-white rounded-3xl shadow-md transform transition-all duration-300 hover:bg-teal-500 hover:-translate-y-1 hover:scale-105 focus:ring-2 focus:ring-blue-400 focus:outline-none dark:bg-blue-700 dark:hover:bg-teal-600">
+                    <button className="px-6 py-2  text-blue-600 rounded-3xl  hover:text-blue-800 font-semibold  border-[2px] border-blue-600 hover:border-blue-800 hover:bg-blue-50 focus:ring-1 focus:ring-blue-600 focus:outline-none ">
                       Contact
                     </button>
                   </div>
                 </div>
 
                 {/* Eligibility Criteria */}
-                <div className="space-y-4 pt-6   px-5">
+                <div className="space-y-4 pt-3  rounded-sm  px-5">
                   <div className="bg-stone-200/50  px-6 py-1">
                     <h3 className="font-semibold text-gray-800 pb-3">
                       Eligibility Criteria:
@@ -189,7 +189,7 @@ const JobDetails = () => {
                   </div>
 
                   <div>
-                    <h3 className="font-semibold text-lg text-gray-800">
+                    <h3 className="font-semibold pt-5 text-lg text-gray-800">
                       About the Job
                     </h3>
                     <p className="text-gray-600">{description}</p>
