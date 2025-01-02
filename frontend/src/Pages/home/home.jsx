@@ -7,7 +7,7 @@ import {
 } from "../../redux/userSlice";
 import { jwtDecode } from "jwt-decode";
 import { IoImagesOutline } from "react-icons/io5";
-import { MdModeEdit } from "react-icons/md";
+import { MdModeEdit, MdSave } from "react-icons/md";
 import { toast } from "react-toastify";
 
 function Home() {
@@ -314,7 +314,7 @@ function Home() {
         <div className="w-full mx-auto border-[2px] border-gray-600 bg-opacity-40 bg-white backdrop-blur-md rounded-lg shadow-lg p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <div className="relative h-32 w-32 overflow-hidden border-[3px] border-gray-600 rounded-full bg-gray-200 group">
+              <div className="relative h-32 w-32 overflow-hidden border-[3px] border-gray-600 rounded-md bg-gray-200 group">
                 {/* Profile Picture */}
                 <img
                   src={user?.profile?.profilePic || "/default-profile.png"}
@@ -373,13 +373,21 @@ function Home() {
             </div>
             <button
               onClick={toggleEditMode}
-              className={`${
+              className={`flex items-center gap-2 transition duration-300 ease-in-out ${
                 isEditing
-                  ? "bg-green-600 hover:bg-green-700"
-                  : " hover:bg-gray-200"
-              } text-gray-800 text-2xl text-center font-bold py-2 px-4 rounded-lg w-10 h-10 transition`}
+                  ? "bg-green-600 hover:bg-green-700 text-white"
+                  : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+              } text-xl font-bold py-2 px-4 rounded-lg shadow-md`}
             >
-              {isEditing ? "Save Changes" : <MdModeEdit className="" />}
+              {isEditing ? (
+                <>
+                  <MdSave className="text-white text-xl" /> Save Changes
+                </>
+              ) : (
+                <>
+                  <MdModeEdit className="text-gray-800 text-xl" /> Edit
+                </>
+              )}
             </button>
           </div>
 

@@ -11,7 +11,7 @@ export const createJob = createAsyncThunk(
       const response = await axiosInstance.post("/jobs/create", jobData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || "Failed to create job.");
     }
   }
 );
@@ -25,6 +25,19 @@ export const getAllJobs = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+// Thunk to show eligible students
+export const showEligibleStudents = createAsyncThunk(
+  "jobs/showEligibleStudents",
+  async (criteria, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post("/jobs/eligible-students", criteria);
+      return response.data; // Return the list of eligible students
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch eligible students.");
     }
   }
 );
@@ -94,25 +107,60 @@ export const updateRoundResults = createAsyncThunk(
   }
 );
 
+// Thunk for updating the job logo
+export const updateLogo = createAsyncThunk(
+  "jobs/updateLogo",
+  async ({ jobId, logoFile }, { rejectWithValue }) => {
+    try {
+      // FormData to handle file uploads
+      const formData = new FormData();
+      formData.append("logo", logoFile);
+
+      const response = await axiosInstance.put(`/jobs/${jobId}/logo`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Required for file uploads
+        },
+      });
+
+      return response.data; // Response with updated logo URL
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to update logo.");
+    }
+  }
+);
+
+
 // Slice
 const jobsSlice = createSlice({
   name: "jobs",
   initialState: {
     jobs: [],
+    eligibleStudents: [], // New state for storing eligible students
+    totalEligibleStudents: 0, // Count of eligible students
     jobDetails: null,
     loading: false,
     error: null,
+    success: false,
   },
-  reducers: {},
+  reducers: {
+    resetState: (state) => {
+      state.loading = false;
+      state.error = null;
+      state.success = false;
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Create Job
       .addCase(createJob.pending, (state) => {
         state.loading = true;
+        state.error = null;
+        state.success = false;
       })
       .addCase(createJob.fulfilled, (state, action) => {
         state.loading = false;
         state.jobs.push(action.payload.job);
+        state.success = true;
       })
       .addCase(createJob.rejected, (state, action) => {
         state.loading = false;
@@ -204,8 +252,41 @@ const jobsSlice = createSlice({
       .addCase(updateRoundResults.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(updateLogo.pending, (state) => {
+        state.loading = true;
+        state.error = null; // Indicate loading during logo update
+      })
+      .addCase(updateLogo.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        const updatedJob = state.jobs.find((job) => job._id === action.meta.arg.jobId);
+        if (updatedJob) {
+          updatedJob.logo = action.payload.logo;
+        }
+      })
+      .addCase(updateLogo.rejected, (state, action) => {
+        state.loading = false; // Stop loading
+        state.error = action.payload; // Handle errors
+      })
+
+      // Show Eligible Students
+      .addCase(showEligibleStudents.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(showEligibleStudents.fulfilled, (state, action) => {
+        state.loading = false;
+        state.eligibleStudents = action.payload.students; // Store eligible students
+        state.totalEligibleStudents = action.payload.totalEligibleStudents; // Store the total count
+        state.success = true;
+      })
+      .addCase(showEligibleStudents.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
+export const { resetState } = jobsSlice.actions;
 export default jobsSlice.reducer;

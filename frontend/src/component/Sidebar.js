@@ -48,7 +48,7 @@ const Sidebar = () => {
   const profileCompletion = profileCompletionDetails?.profileCompletion || 0; // Default to 0 if not available
 
   return (
-    <div className=" sticky top-0 flex w-84 flex-col  bg-transparent text-[rgb(192,192,192)] h-[120vh]">
+    <div className=" sticky top-0 flex w-84 flex-col  bg-transparent text-[rgb(192,192,192)] h-[140vh]">
       <div className="p-4">
         <img
           src="/harit.png"
