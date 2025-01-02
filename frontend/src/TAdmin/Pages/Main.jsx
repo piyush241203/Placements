@@ -1,4 +1,6 @@
 import Content from '../Components/Content';
+import DashboardData from '../Components/DashboardData';
+
 
 const Main = () => {
   return (
@@ -8,6 +10,7 @@ const Main = () => {
       </h1>
       {/* <Header/> */}
       <Content />
+      <DashboardData/>
     </div>
   );
 };

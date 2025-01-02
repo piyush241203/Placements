@@ -57,8 +57,8 @@
 
 // import React from "react";
 import React, { useState } from "react";
-import { MdModeEdit } from "react-icons/md";
-import { FaRankingStar } from "react-icons/fa6";
+// import { MdModeEdit } from "react-icons/md";
+import { FaRankingStar, FaUserCheck } from "react-icons/fa6";
 import { MdDeleteForever } from "react-icons/md";
 import { useDispatch } from "react-redux";
 import { deleteJob } from "../../redux/jobSlice"; // Adjust the import path as needed
@@ -108,12 +108,12 @@ const JobCard = ({ job }) => {
                         <h4 className="text-[20px] font-bold text-[#16163b] my-[2px]">{title}</h4>
                         <p className="text-[15px] text-[#16163b]">Location: {location}</p>
                     </div>
-                    <button className="absolute top-[0px] right-[10px] flex items-center gap-1 px-2 py-0.5 pr-3 bg-[#A6C0CF] shadow-xl text-[#16163b] border border-[#517488] rounded-xl text-[15px] font-medium hover:bg-[#80a7be]">
+                    <button className="absolute top-[0px] right-[0px] flex items-center gap-1 px-2 py-0.5 pr-3 bg-[#A6C0CF] shadow-xl text-[#16163b] border border-[#517488] rounded-xl text-[15px] font-medium hover:bg-[#80a7be]">
                         <FaRankingStar /> Create Rounds
                     </button>
                     <div className="absolute top-[35px] right-[0px] flex items-center gap-2">
                         <button className="flex items-center gap-1 px-2 py-0.5 pr-3 bg-[#A6C0CF] shadow-md text-[#16163b] border border-[#517488] rounded-xl text-[15px] font-medium hover:bg-[#80a7be]">
-                            <MdModeEdit /> Edit
+                        <FaUserCheck /> Applied
                         </button>
                         <button className="flex items-center gap-1 px-2 py-0.5 pr-3 bg-[#dd4d4d] shadow-md text-white border border-[#a52929] rounded-xl text-[15px] font-medium hover:bg-[#a52929]"
                         onClick={() => setIsConfirmOpen(true)}>

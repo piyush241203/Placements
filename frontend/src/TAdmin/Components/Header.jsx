@@ -32,8 +32,8 @@ const Header = ({filterCriteria, onFilterChange}) => {
 
   return (
     <>
-      <header className="relative flex items-center justify-center p-2 gap-6">
-        <div className="relative w-1/3 mt-2 min-w-[220px] max-w-[700px] flex items-center">
+      <header className="relative flex mt-5 items-center justify-center p-2 gap-6">
+        <div className="relative w-1/3 min-w-[220px] max-w-[700px] flex items-center">
           <input
             type="text"
             placeholder="Search..."

@@ -1,4 +1,28 @@
 {
+	"message": "College created successfully",
+	"college": {
+		"name": "Abha Gaikwad-Patil College of Engineering and Technology",
+		"address": "Nagpur",
+		"subscription": {
+			"planType": "standard",
+			"startDate": "2024-07-28T00:00:00.000Z",
+			"endDate": "2024-12-31T00:00:00.000Z",
+			"status": "active"
+		},
+		"_id": "67619e71d4d5f64ada26855b",
+		"createdAt": "2024-12-17T15:53:21.613Z",
+		"updatedAt": "2024-12-17T15:53:21.613Z",
+		"__v": 0
+	}
+}
+
+{
+    labels: ['CSE', 'IT', 'AIML', 'DS', 'ECE', 'EE', 'AE', 'CE'],
+    Number of Students: [120, 80, 60, 50, 90, 70, 30, 40],
+}
+
+
+{
     "message": "User details fetched successfully",
     "user": {
         "profile": {

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
-import Content from "../../Components/Content";
+// import Content from "../../Components/Content";
 import "./PostsPage.css";
 import { MdLibraryAdd } from "react-icons/md";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { MdOutlineAddPhotoAlternate } from "react-icons/md";
+// import { MdOutlineAddPhotoAlternate } from "react-icons/md";
 import { createJob } from "../../../redux/jobSlice";
 import ReactQuill from "react-quill"; // Import react-quill
 import "react-quill/dist/quill.snow.css"; // Import quill styles
@@ -20,7 +20,7 @@ const PostsPage = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    company: "",
+    company: "", 
     location: "",
     type: "", // Default to job
     jobDate: "",
@@ -124,20 +124,20 @@ const PostsPage = () => {
   return (
     <div className="posts">
       <h1 className="heading-main">Internship/Job Posting</h1>
-      <Content />
+      {/* <Content /> */}
       <div className="outer-main">
         <div className="job-intern-main">
-          <NavLink
+          {/* <NavLink
             to="#"
             className={`nav-post ${activeForm === "job" ? "active-nav" : ""}`}
             onClick={() => setActiveForm("job")}
-          >
-            <MdLibraryAdd className="icon" />
-            <h2>Post Job</h2>
-          </NavLink>
+          > */}
+            {/* <MdLibraryAdd className="icon" /> */}
+            <h2><MdLibraryAdd className="icon" /> Add Post's</h2>
+          {/* </NavLink> */}
         </div>
 
-        {activeForm === "job" && (
+        {/* {activeForm === "job" && ( */}
           <div className="job-main">
             <div className="job-info">
               {/* <div className="job-logo-wrapper">
@@ -202,8 +202,8 @@ const PostsPage = () => {
                     onChange={handleInputChange}
                     placeholder="Enter Job Location"
                   />
-                </div>
-                <div className="form-group">
+
+                  {/* <div className="form-group"> */}
                   <label>Date:</label>
                   <input
                     type="date"
@@ -211,7 +211,18 @@ const PostsPage = () => {
                     value={formData.jobDate}
                     onChange={handleInputChange}
                   />
+                  {/* </div> */}
+
                 </div>
+                {/* <div className="form-group">
+                  <label>Date:</label>
+                  <input
+                    type="date"
+                    name="jobDate"
+                    value={formData.jobDate}
+                    onChange={handleInputChange}
+                  />
+                </div> */}
               </div>
             </div>
             <div className="job-desc">
@@ -229,7 +240,7 @@ const PostsPage = () => {
               Next
             </button>
           </div>
-        )}
+        {/* )} */}
 
 
         {step === 2 && (
