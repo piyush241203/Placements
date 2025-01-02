@@ -138,7 +138,7 @@ const UserProfile = () => {
   const dispatch = useDispatch();
   const { student, status,token, error } = useSelector((state) => state.user);
   
-  
+   
   useEffect(() => {
     const fetchData = debounce(() => {
       if (userId && (!student || student._id !== userId)) {
@@ -242,7 +242,7 @@ const UserProfile = () => {
           </div>
           <div className="w-full h-[1.5px] rounded-[30px] my-7 bg-[rgba(33,86,105,0.758)]" />
           <AcademicRecords academicRecords={student?.profile?.academicRecords} />
-          <JobInternContent />
+          <JobInternContent appliedJobsHistory={student?.profile?.appliedJobsHistory}/>
           <UserStatus userStatus={student?.profile?.currentStatus}/>
         </div>
             </>
