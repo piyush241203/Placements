@@ -11,7 +11,7 @@ export const loginUser = createAsyncThunk(
       const { token } = response.data.user;
 
       // Store token securely using Cookies.set
-      Cookies.set("token", token, {
+      Cookies.set("mpsp", token, {
         path: "/",
         secure: process.env.NODE_ENV === "production", // Ensure the cookie is sent only over HTTPS
         sameSite: "Strict", // Prevent cross-site usage
@@ -35,7 +35,7 @@ export const logoutUser = createAsyncThunk(
       await axiosInstance.post("/auth/logout");
 
       // Clear token from cookies
-      Cookies.remove("token", { path: "/" }); // Ensure the path matches
+      Cookies.remove("mpsp", { path: "/" }); // Ensure the path matches
 
       // Remove persist:root from localStorage to clear Redux state
       localStorage.removeItem("persist:root");
@@ -74,7 +74,7 @@ export const fetchUserById = createAsyncThunk(
       const response = await axiosInstance.get(`/auth/user/${userId}`);
       return response.data.user; // Return fetched user data
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Failed to fetch user");
+      return rejectWithValue(error.response?.data || "Failed to fetch user");
     }
   }
 );
@@ -88,7 +88,7 @@ export const getProfileCompletionDetails = createAsyncThunk(
       const response = await axiosInstance.get("/auth/get-profile-completion");
       return response.data.profileDetails; // Return profile completion details
     } catch (error) {
-      return rejectWithValue(error.response.data.message || "Failed to fetch profile completion details");
+      return rejectWithValue(error.response.data || "Failed to fetch profile completion details");
     }
   }
 );
@@ -101,7 +101,7 @@ export const updateStudentProfile = createAsyncThunk(
       const response = await axiosInstance.put(`/auth/update-profile/${profileUpdates.studentId}`, profileUpdates);
       return response.data; // Return updated student profile
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Failed to update profile");
+      return rejectWithValue(error.response?.data || "Failed to update profile");
     }
   }
 );
@@ -118,7 +118,7 @@ export const updateProfilePic = createAsyncThunk(
       });
       return response.data.profilePic; // Return the new profile picture URL
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Failed to update profile picture");
+      return rejectWithValue(error.response?.data || "Failed to update profile picture");
     }
   }
 );
@@ -136,7 +136,33 @@ export const listUsersOfCollege = createAsyncThunk(
       const response = await axiosInstance.get(`/auth/college/${collegeId}/users`);
       return response.data.users; // Return the list of users
     } catch (error) {
-      return rejectWithValue(error.response.data.message || "Failed to fetch users of the college");
+      return rejectWithValue(error.response?.data || "Failed to fetch users of the college");
+    }
+  }
+);
+
+export const createStudent = createAsyncThunk(
+  "user/createStudent",
+  async (studentData, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post("/auth/create-student", studentData);
+      return response.data.student; // Return the created student data
+    } catch (error) {
+      console.log("Error response:", error.response); // Log the full error response
+      return rejectWithValue(error.response?.data || "Failed to create student");
+    }
+  }
+);
+
+// Thunk for deleting a user
+export const deleteUser  = createAsyncThunk(
+  "user/deleteUser ",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(`/auth/delete-student/${userId}`);
+      return response.data; // Return the deleted user data
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to delete user");
     }
   }
 );
@@ -147,10 +173,11 @@ const userSlice = createSlice({
   name: "user",
   initialState: {
     user: null,
-    token: Cookies.get("token") || null, // Fetch token from cookies
+    token: Cookies.get("mpsp") || null, // Fetch token from cookies
     profileCompletionDetails: [],
     collegeUsers: [],
     student: [],
+    createdStudent: null,
     status: "idle",
     error: null,
   },
@@ -161,6 +188,7 @@ const userSlice = createSlice({
        state.student  = [];
       state.profileCompletionDetails = []; 
       state.collegeUsers = [];
+      state.createdStudent = null;
       state.status = "idle";
       state.error = null;
     },
@@ -231,6 +259,30 @@ const userSlice = createSlice({
       state.error = null;
     })
     .addCase(listUsersOfCollege.rejected, (state, action) => {
+      state.status = "failed";
+      state.error = action.payload;
+    })
+    // Existing cases...
+    .addCase(createStudent.fulfilled, (state, action) => {
+      state.createdStudent = action.payload; // Store the created student
+      state.status = "succeeded";
+      state.error = null;
+    })
+    .addCase(createStudent.pending, (state) => {
+      state.status = "loading";
+    })
+    .addCase(createStudent.rejected, (state, action) => {
+      state.status = "failed";
+      state.error = action.payload;
+    })
+    .addCase(deleteUser .pending, (state) => {
+      state.status = "loading";
+    })
+    .addCase(deleteUser .fulfilled, (state, action) => {
+      state.status = "succeeded";
+      state.error = null;
+    })
+    .addCase(deleteUser .rejected, (state, action) => {
       state.status = "failed";
       state.error = action.payload;
     });

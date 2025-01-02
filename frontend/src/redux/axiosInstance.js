@@ -12,7 +12,7 @@ const axiosInstance = axios.create({
 // Add an interceptor to attach the token to every request
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = Cookies.get("token"); // Get token from cookies
+    const token = Cookies.get("mpsp"); // Get token from cookies
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -25,17 +25,17 @@ axiosInstance.interceptors.request.use(
 );
 
 // Add a response interceptor for error handling
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Handle unauthorized errors globally
-    if (error.response && error.response.status === 401) {
-      // Optionally, redirect to login page or clear token
-      Cookies.remove("token", { path: "/" });
-      window.location.href = "/login"; // Redirect to login page
-    }
-    return Promise.reject(error);
-  }
-);
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     // Handle unauthorized errors globally
+//     if (error.response && error.response.status === 401) {
+//       // Optionally, redirect to login page or clear token
+//       Cookies.remove("token", { path: "/" });
+//       window.location.href = "/login"; // Redirect to login page
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 export default axiosInstance;

@@ -83,9 +83,19 @@ export const loginUser = async (req, res) => {
     if (!isPasswordValid) return res.status(401).json({ message: "Invalid credentials" });
 
     // 3. Generate JWT token and set it in cookies
-    const token = jwt.sign({ id: user._id ,role: user.role, college: user.college._id }, process.env.JWT_SECRET, { expiresIn: '30d' });  // Check token in server logs
+    const tokenPayload = { id: user._id, role: user.role };
 
-    res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production',  sameSite: "Strict" // Prevents CSRF attacks
+    // Add college to the payload if it exists
+    if (user.college) {
+      tokenPayload.college = user.college._id;
+    }
+
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+    res.cookie('token', token, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production',  
+      sameSite: "Strict" 
     });
 
     res.status(200).json({ message: "Login successful", user: { id: user._id, role: user.role, token } });
@@ -149,27 +159,36 @@ export const listUsersOfCollege = async (req, res) => {
 export const fetchUserById = async (req, res) => {
   try {
     const { userId } = req.params; // User ID from the request params
-    
-    // Fetch the user by ID and populate necessary fields (like college and applied jobs history)
+
+    // Fetch the user by ID and populate necessary fields
     const user = await User.findById(userId)
-      .populate("college", "name")  // Populating the college name
-      .populate("profile.appliedJobsHistory.jobId", " title company location type description logo") // Populating job history with job title and company
-     
+      .populate("college", "name") // Populating the college name
+      .populate("profile.appliedJobsHistory.jobId", "title company location type description logo"); // Populating job history with job details
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({ 
-      message: "User details fetched successfully", 
-      user 
+    // Filter out null or deleted jobs from the appliedJobsHistory
+    const filteredAppliedJobsHistory = user.profile.appliedJobsHistory.filter(
+      (job) => job.jobId !== null
+    );
+
+    // Replace the original appliedJobsHistory with the filtered one
+    user.profile.appliedJobsHistory = filteredAppliedJobsHistory;
+
+    res.status(200).json({
+      message: "User details fetched successfully",
+      user,
     });
   } catch (error) {
     res.status(500).json({
       message: "Server error",
-      error: error.message
+      error: error.message,
     });
   }
 };
+
 
 export const deleteStudent = async (req, res) => {
   const { studentId } = req.params;

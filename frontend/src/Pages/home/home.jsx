@@ -928,13 +928,13 @@ function Home() {
           {/* Applied Jobs */}
           <div className="mt-8">
             <h2 className="text-2xl font-bold text-gray-800">Applied Jobs</h2>
-            <div className="space-y-4 mt-4">
+            <div className="space-y-2 mt-4">
               {user?.profile?.appliedJobsHistory?.map((job, index) => (
-                <div key={index} className="space-y-2">
+                <div key={index} className="space-y-2 bg-white/80 shadow-sm rounded-lg p-4">
                   <p className="font-medium">
-                    {job.jobId.title} at {job.jobId.company}
+                    <span className="font-semibold">{job.jobId.title}</span> at {job.jobId.company}
                   </p>
-                  <p className="text-sm">
+                  <p className="text-xs">
                     Applied on: {new Date(job.appliedOn).toLocaleDateString()}
                   </p>
                 </div>
