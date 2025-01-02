@@ -1,120 +1,146 @@
-import React, { useState } from 'react';
-import { NavLink } from "react-router-dom";
-import Content from '../../Components/Content';
-import './PostsPage.css';
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { NavLink, useNavigate } from "react-router-dom";
+import Content from "../../Components/Content";
+import "./PostsPage.css";
 import { MdLibraryAdd } from "react-icons/md";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineAddPhotoAlternate } from "react-icons/md";
+import { createJob } from "../../../redux/jobSlice";
+import ReactQuill from "react-quill"; // Import react-quill
+import "react-quill/dist/quill.snow.css"; // Import quill styles
 
 const PostsPage = () => {
-  const [activeForm, setActiveForm] = useState('job');
+  const [activeForm, setActiveForm] = useState("job");
+  const [step, setStep] = useState(1); // Step 1: Form, Step 2: Filters
+
   const [showPopup, setShowPopup] = useState(false);
-  const [filters, setFilters] = useState({
-    branches: [],
-    gender: [],
-    semester: [],
-    cgpa: '',
-    min10th: '',
-    min12th: '',
-    minPoly: '',
-    prevBacklogs: '',
-    currBacklogs: '',
-    skills: ''
-  });
 
   const [formData, setFormData] = useState({
-    companyName: '',
-    jobName: '',
-    jobDesignation: '',
-    jobLocation: '',
-    jobDescription: '',
-    internshipName: '',
-    jobLogo: null, // To store the uploaded image file
+    title: "",
+    description: "",
+    company: "",
+    location: "",
+    type: "", // Default to job
+    jobDate: "",
+    eligibilityCriteria: {
+      branch: [],
+      gender: "",
+      cgpa: "",
+      session: "",
+      tenthPercentage: "",
+      twelfthPercentage: "",
+      polyPercentage: "",
+      currentBacklogs: 0,
+    },
   });
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading } = useSelector((state) => state.jobs);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFilters({ ...filters, [name]: value });
-  };
-
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData({ ...formData, jobLogo: file });
-    }
-  };
-
-  const handleNextClick = (classifier) => {
-    const data = {
-      classifier,
-      ...formData,
-    };
-    console.log('Next button clicked with data:', data);
-
-    setShowPopup(true);
-  };
-
-  const handleMultiSelect = (name, value) => {
-    setFilters((prevState) => {
-      const values = new Set(prevState[name]);
-      if (values.has(value)) values.delete(value);
-      else values.add(value);
-      return { ...prevState, [name]: Array.from(values) };
-    });
-  };
-
-  const applyFilters = () => {
-    console.log('Filters applied:', filters);
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const clearFilters = () => {
-    setFilters({
-      branches: [],
-      gender: [],
-      semester: [],
-      cgpa: '',
-      min10th: '',
-      min12th: '',
-      minPoly: '',
-      prevBacklogs: '',
-      currBacklogs: '',
-      skills: ''
+    setFormData((prev) => ({
+      ...prev,
+      eligibilityCriteria: {
+        branch: [],
+        gender: "",
+        cgpa: "",
+        session: "",
+        tenthPercentage: "",
+        twelfthPercentage: "",
+        polyPercentage: "",
+        currentBacklogs: 0,
+      },
+    }));
+    toast.info("Filters cleared!");
+  };
+
+  // const handleFormChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData({ ...formData, [name]: value });
+  // };
+
+  const handleMultiSelect = (name, value) => {
+    setFormData((prev) => {
+      const values = new Set(prev.eligibilityCriteria[name]);
+      if (values.has(value)) {
+        values.delete(value);
+      } else {
+        values.add(value);
+      }
+      return {
+        ...prev,
+        eligibilityCriteria: {
+          ...prev.eligibilityCriteria,
+          [name]: Array.from(values),
+        },
+      };
     });
   };
 
+  const handleDescriptionChange = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      description: value,
+    }));
+  };
+
+  const handleNext = () => {
+    if (
+      !formData.title ||
+      !formData.company ||
+      !formData.location ||
+      !formData.jobDate
+    ) {
+      toast.error("Please fill all required fields!");
+      return;
+    }
+    setStep(2);
+  };
+
+  const handleSubmit = () => {
+    console.log("Sending data to backend:", formData); // Log the data being sent
+    dispatch(createJob(formData))
+      .unwrap()
+      .then(() => {
+        toast.success("Post created successfully!");
+        navigate("/tadmin/status", { state: { jobCreated: true } });
+      })
+      .catch((error) => {
+        toast.error(`Error: ${error.message || "Failed to create post"}`);
+      });
+  };
+
   return (
-    <div className='posts'>
-      <h1 className='heading-main'>Internship/Job Posting</h1>
+    <div className="posts">
+      <h1 className="heading-main">Internship/Job Posting</h1>
       <Content />
       <div className="outer-main">
         <div className="job-intern-main">
           <NavLink
             to="#"
-            className={`nav-post ${activeForm === 'job' ? "active-nav" : ""}`}
-            onClick={() => setActiveForm('job')}
+            className={`nav-post ${activeForm === "job" ? "active-nav" : ""}`}
+            onClick={() => setActiveForm("job")}
           >
             <MdLibraryAdd className="icon" />
-            <h2>Add Job's</h2>
-          </NavLink>
-          <span></span>
-          <NavLink
-            to="#"
-            className={`nav-post ${activeForm === 'internship' ? "active-nav" : ""}`}
-            onClick={() => setActiveForm('internship')}
-          >
-            <MdLibraryAdd className="icon" />
-            <h2>Add Internship</h2>
+            <h2>Post Job</h2>
           </NavLink>
         </div>
 
-        {activeForm === 'job' && (
+        {activeForm === "job" && (
           <div className="job-main">
             <div className="job-info">
-              <div className="job-logo-wrapper">
+              {/* <div className="job-logo-wrapper">
                 {formData.jobLogo ? (
                   <img
                     src={URL.createObjectURL(formData.jobLogo)}
@@ -134,15 +160,15 @@ const PostsPage = () => {
                   style={{ display: 'none' }}
                   className='job-logo-input'
                 />
-              </div>
+              </div> */}
               <div className="job-name-role">
                 <div className="company-name">
                   <label>Company Name:</label>
                   <input
                     type="text"
-                    name="companyName"
-                    value={formData.companyName}
-                    onChange={handleFormChange}
+                    name="company"
+                    value={formData.company}
+                    onChange={handleInputChange}
                     placeholder="Enter Company Name"
                   />
                 </div>
@@ -150,155 +176,104 @@ const PostsPage = () => {
                   <label>Job Title:</label>
                   <input
                     type="text"
-                    name="jobName"
-                    value={formData.jobName}
-                    onChange={handleFormChange}
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
                     placeholder="Enter Job Title"
                   />
                 </div>
                 <div className="job-des-loc">
-                  <label>Designation:</label>
-                  <input
-                    type="text"
-                    name="jobDesignation"
-                    value={formData.jobDesignation}
-                    onChange={handleFormChange}
-                    placeholder="Enter Job Designation"
-                  />
+                  <label>Type:</label>
+                   <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleInputChange}
+                    className="flex-1 py-1 px-2 border-b-2 border-[#215669C1] rounded-md bg-transparent text-[rgb(22,22,59)] focus:outline-none placeholder-[#215669C1] focus:border-[rgb(22,22,59)]"
+                  >
+                    <option value="">Select Type</option>
+                    <option value="job">Job</option>
+                    <option value="Internship">Internship</option>
+                  </select>
                   <label>Location:</label>
                   <input
                     type="text"
-                    name="jobLocation"
-                    value={formData.jobLocation}
-                    onChange={handleFormChange}
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
                     placeholder="Enter Job Location"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Date:</label>
+                  <input
+                    type="date"
+                    name="jobDate"
+                    value={formData.jobDate}
+                    onChange={handleInputChange}
                   />
                 </div>
               </div>
             </div>
             <div className="job-desc">
               <label>Job Description:</label>
-              <textarea
-                name="jobDescription"
-                value={formData.jobDescription}
-                onChange={handleFormChange}
+              <ReactQuill
+                value={formData.description}
+                onChange={handleDescriptionChange}
                 placeholder="Enter Job Description"
                 className="job-description"
-              ></textarea>
+                theme="snow"
+              />
             </div>
-            <button className='next-button' onClick={() => handleNextClick('job')}>Next</button>
+
+            <button className="next-button" onClick={handleNext}>
+              Next
+            </button>
           </div>
         )}
 
-        {activeForm === 'internship' && (
-          <div className="job-main">
-            <div className="job-info">
-              <div className="job-logo-wrapper">
-                {formData.jobLogo ? (
-                  <img
-                    src={URL.createObjectURL(formData.jobLogo)}
-                    alt="Internship Logo"
-                    className="job-logo"
-                  />
-                ) : (
-                  <label htmlFor="job-logo-input" className="add-logo-icon">
-                    <MdOutlineAddPhotoAlternate />
-                  </label>
-                )}
-                <input
-                  type="file"
-                  id="job-logo-input"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  style={{ display: 'none' }}
-                />
-              </div>
-              <div className="job-name-role">
-                <div className="company-name">
-                  <label>Company Name:</label>
-                  <input
-                    type="text"
-                    name="companyName"
-                    value={formData.companyName}
-                    onChange={handleFormChange}
-                    placeholder="Enter Company Name"
-                  />
-                </div>
-                <div className="job-name">
-                  <label>Internship Title:</label>
-                  <input
-                    type="text"
-                    name="internshipName"
-                    value={formData.internshipName}
-                    onChange={handleFormChange}
-                    placeholder="Enter Internship Title"
-                    className='internship-name'
-                  />
-                </div>
-                <div className="job-des-loc">
-                  <label>Designation:</label>
-                  <input
-                    type="text"
-                    name="jobDesignation"
-                    value={formData.jobDesignation}
-                    onChange={handleFormChange}
-                    placeholder="Enter Internship Designation"
-                  />
-                  <label>Location:</label>
-                  <input
-                    type="text"
-                    name="jobLocation"
-                    value={formData.jobLocation}
-                    onChange={handleFormChange}
-                    placeholder="Enter Internship Location"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="job-desc">
-              <label>Internship Description:</label>
-              <textarea
-                name="jobDescription"
-                value={formData.jobDescription}
-                onChange={handleFormChange}
-                placeholder="Enter Internship Description"
-                className="job-description"
-              ></textarea>
-            </div>
-            <button className="next-button" onClick={() => handleNextClick('internship')}>Next</button>
-          </div>
-        )}
 
-        {showPopup && (
+        {step === 2 && (
           <div className="popup">
             <div className="popup-content">
-                <button className="close-btn" onClick={() => setShowPopup(false)}>×</button>
-                <div className='popup-header'>
-                    {/* <button className="close-btn" onClick={() => setShowPopup(false)}>×</button> */}
-                    <h2>Filtration</h2>
-                </div>
-              
+              <button className="close-btn" onClick={() => setShowPopup(false)}>
+                ×
+              </button>
+              <div className="popup-header">
+                {/* <button className="close-btn" onClick={() => setShowPopup(false)}>×</button> */}
+                <h2>Filtration</h2>
+              </div>
+
               {/* Filtration form here */}
               <div className="filter-group">
                 <label>Branches:</label>
-                {['CSE', 'IT', 'Aero', 'Bio', 'Mech', 'EE', 'ECE'].map((branch) => (
-                  <button
-                    key={branch}
-                    className={filters.branches.includes(branch) ? 'selected' : ''}
-                    onClick={() => handleMultiSelect('branches', branch)}
-                  >
-                    {branch}
-                  </button>
-                ))}
+                {["CSE", "IT", "Aero", "Bio", "Mech", "EE", "ECE"].map(
+                  (branch) => (
+                    <button
+                      key={branch}
+                      className={
+                        formData.eligibilityCriteria.branch.includes(branch)
+                          ? "selected"
+                          : ""
+                      }
+                      onClick={() => handleMultiSelect("branch", branch)}
+                    >
+                      {branch}
+                    </button>
+                  )
+                )}
               </div>
 
               <div className="filter-group">
                 <label>Gender:</label>
-                {['Male', 'Female'].map((gender) => (
+                {["Male", "Female"].map((gender) => (
                   <button
                     key={gender}
-                    className={filters.gender.includes(gender) ? 'selected' : ''}
-                    onClick={() => handleMultiSelect('gender', gender)}
+                    className={
+                      formData.eligibilityCriteria.gender.includes(gender)
+                        ? "selected"
+                        : ""
+                    }
+                    onClick={() => handleMultiSelect("gender", gender)}
                   >
                     {gender}
                   </button>
@@ -306,12 +281,16 @@ const PostsPage = () => {
               </div>
 
               <div className="filter-group">
-                <label>Semester:</label>
-                {['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'].map((sem) => (
+                <label>Session:</label>
+                {["2023-2024", "2024-2025", "2025-2026"].map((sem) => (
                   <button
                     key={sem}
-                    className={filters.semester.includes(sem) ? 'selected' : ''}
-                    onClick={() => handleMultiSelect('semester', sem)}
+                    className={
+                      formData.eligibilityCriteria.session.includes(sem)
+                        ? "selected"
+                        : ""
+                    }
+                    onClick={() => handleMultiSelect("session", sem)}
                   >
                     {sem}
                   </button>
@@ -323,15 +302,15 @@ const PostsPage = () => {
                 <input
                   type="number"
                   name="cgpa"
-                  value={filters.cgpa}
+                  value={formData.eligibilityCriteria.cgpa}
                   onChange={handleInputChange}
-                  placeholder='Enter Min CGPA needed'
+                  placeholder="Enter Min CGPA needed"
                   min="1"
                   max="10"
                   step="0.1"
                   onInput={(e) => {
-                    if (e.target.value > 10) e.target.value = 10; 
-                    if (e.target.value < 0) e.target.value = 0;    
+                    if (e.target.value > 10) e.target.value = 10;
+                    if (e.target.value < 0) e.target.value = 0;
                   }}
                 />
               </div>
@@ -340,15 +319,15 @@ const PostsPage = () => {
                 <label>10th %:</label>
                 <input
                   type="number"
-                  name="min10th"
-                  value={filters.min10th}
+                  name="tenthPercentage"
+                  value={formData.eligibilityCriteria.tenthPercentage}
                   onChange={handleInputChange}
-                  placeholder='Enter Min 10th % needed'
+                  placeholder="Enter Min 10th % needed"
                   min="1"
                   max="100"
                   onInput={(e) => {
-                    if (e.target.value > 100) e.target.value = 100; 
-                    if (e.target.value < 0) e.target.value = 0;    
+                    if (e.target.value > 100) e.target.value = 100;
+                    if (e.target.value < 0) e.target.value = 0;
                   }}
                 />
               </div>
@@ -357,15 +336,15 @@ const PostsPage = () => {
                 <label>12th %:</label>
                 <input
                   type="number"
-                  name="min12th"
-                  value={filters.min12th}
+                  name="twelfthPercentage"
+                  value={formData.eligibilityCriteria.twelfthPercentage}
                   onChange={handleInputChange}
-                  placeholder='Enter Min 12th % needed'
+                  placeholder="Enter Min 12th % needed"
                   min="1"
                   max="100"
                   onInput={(e) => {
-                    if (e.target.value > 100) e.target.value = 100; 
-                    if (e.target.value < 0) e.target.value = 0;    
+                    if (e.target.value > 100) e.target.value = 100;
+                    if (e.target.value < 0) e.target.value = 0;
                   }}
                 />
               </div>
@@ -374,15 +353,15 @@ const PostsPage = () => {
                 <label>Poly %:</label>
                 <input
                   type="number"
-                  name="minPoly"
-                  value={filters.minPoly}
+                  name="polyPercentage"
+                  value={formData.eligibilityCriteria.polyPercentage}
                   onChange={handleInputChange}
-                  placeholder='Enter Min Poly % needed'
+                  placeholder="Enter Min Poly % needed"
                   min="1"
                   max="100"
                   onInput={(e) => {
-                    if (e.target.value > 100) e.target.value = 100; 
-                    if (e.target.value < 0) e.target.value = 0;    
+                    if (e.target.value > 100) e.target.value = 100;
+                    if (e.target.value < 0) e.target.value = 0;
                   }}
                 />
               </div>
@@ -391,13 +370,13 @@ const PostsPage = () => {
                 <label>Previous Backlogs:</label>
                 <input
                   type="number"
-                  name="prevBacklogs"
-                  value={filters.prevBacklogs}
+                  name="currentBacklogs"
+                  value={formData.eligibilityCriteria.currentBacklogs}
                   onChange={handleInputChange}
-                  placeholder='Enter Previous Backlogs'
+                  placeholder="Enter Previous Backlogs"
                   onInput={(e) => {
-                    if (e.target.value > 100) e.target.value = 100; 
-                    if (e.target.value < 0) e.target.value = 0;    
+                    if (e.target.value > 100) e.target.value = 100;
+                    if (e.target.value < 0) e.target.value = 0;
                   }}
                 />
               </div>
@@ -407,16 +386,16 @@ const PostsPage = () => {
                 <input
                   type="number"
                   name="currBacklogs"
-                  value={filters.currBacklogs}
+                  value={formData.eligibilityCriteria.currentBacklogs}
                   onChange={handleInputChange}
-                  placeholder='Enter Current Backlogs'
+                  placeholder="Enter Current Backlogs"
                   onInput={(e) => {
-                    if (e.target.value > 100) e.target.value = 100; 
-                    if (e.target.value < 0) e.target.value = 0;    
+                    if (e.target.value > 100) e.target.value = 100;
+                    if (e.target.value < 0) e.target.value = 0;
                   }}
                 />
               </div>
-
+              {/* 
               <div className="filter-group">
                 <label>Required Skills:</label>
                 <input
@@ -426,11 +405,14 @@ const PostsPage = () => {
                   onChange={handleInputChange}
                   placeholder="Enter Skills need"
                 />
-              </div>
+              </div> */}
 
               <div className="filter-actions">
                 <button onClick={clearFilters}>Clear</button>
-                <button onClick={applyFilters}>Apply</button>
+                <button onClick={handleSubmit} disabled={loading}>
+                  {" "}
+                  {loading ? "Creating..." : "Apply"}
+                </button>
               </div>
             </div>
           </div>
@@ -441,5 +423,3 @@ const PostsPage = () => {
 };
 
 export default PostsPage;
-
-
