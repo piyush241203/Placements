@@ -138,7 +138,7 @@ const UserProfile = () => {
   const dispatch = useDispatch();
   const { student, status,token, error } = useSelector((state) => state.user);
   
-  
+   
   useEffect(() => {
     const fetchData = debounce(() => {
       if (userId && (!student || student._id !== userId)) {
