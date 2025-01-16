@@ -246,9 +246,7 @@ const PostsPage = () => {
         {step === 2 && (
           <div className="popup">
             <div className="popup-content">
-              <button className="close-btn" onClick={() => setShowPopup(false)}>
-                ×
-              </button>
+              <button className="close-btn z-50" onClick={() => setShowPopup(false)}>×</button>
               <div className="popup-header">
                 {/* <button className="close-btn" onClick={() => setShowPopup(false)}>×</button> */}
                 <h2>Filtration</h2>
